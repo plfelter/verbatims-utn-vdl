@@ -1,29 +1,29 @@
-<div id="comment-{{ comment.id }}" class="comment" style="border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin-bottom: 15px;">
-    <div class="comment-header" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+<div id="comment-{{ comment.id }}" class="comment">
+    <div class="comment-header">
         <strong>{{ comment.username }}</strong>
-        <span style="color: #777;">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        <span class="comment-timestamp">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
     </div>
-    <div class="comment-body" style="margin-bottom: 10px;">
+    <div class="comment-body">
         {{ comment.body }}
     </div>
-    <div class="comment-actions" style="display: flex; align-items: center; gap: 10px;">
+    <div class="comment-actions">
         <div class="vote-buttons">
             <button 
+                class="upvote-button"
                 hx-post="/comment/{{ comment.id }}/upvote" 
                 hx-target="#comment-{{ comment.id }}"
-                hx-swap="outerHTML"
-                style="background-color: #4CAF50; padding: 5px 10px; font-size: 12px;">
+                hx-swap="outerHTML">
                 👍 Upvote
             </button>
             <button 
+                class="downvote-button"
                 hx-post="/comment/{{ comment.id }}/downvote" 
                 hx-target="#comment-{{ comment.id }}"
-                hx-swap="outerHTML"
-                style="background-color: #666666; padding: 5px 10px; font-size: 12px;">
+                hx-swap="outerHTML">
                 👎 Downvote
             </button>
         </div>
-        <div class="vote-count" style="margin-left: 10px;">
+        <div class="vote-count">
             <span title="Upvotes: {{ comment.upvotes }}, Downvotes: {{ comment.downvotes }}">
                 Score: <strong>{{ comment.vote_score }}</strong>
             </span>
