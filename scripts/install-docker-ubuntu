@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# Simple script to install Docker on Ubuntu if not already installed
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Function to display status messages
+print_status() {
+    echo ">>> $1"
+}
+
+# Check if Docker is already installed
+if command -v docker &> /dev/null; then
+    print_status "Docker is already installed. Current version:"
+    docker --version
+    exit 0
+fi
+
+print_status "Docker not found. Installing Docker..."
+# Before installing Docker Engine, need to uninstall any conflicting packages.
+for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; \
+    do sudo apt-get remove $pkg; done
+
+# Update package index
+print_status "Updating package index..."
+sudo apt-get update
+
+# Install prerequisites
+print_status "Installing prerequisites..."
+sudo apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+
+# Add Docker's official GPG key
+print_status "Adding Docker's official GPG key..."
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Update package index again with Docker repo
+print_status "Updating package index with Docker repository..."
+sudo apt-get update
+
+# Install Docker Engine
+print_status "Installing Docker Engine..."
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+print_status "Verify that the installation is successful by running the hello-world image:"
+sudo docker run hello-world
+
+# Add current user to the docker group to use Docker without sudo
+print_status "Adding current user to the docker group..."
+sudo usermod -aG docker $USER
+
+print_status "Docker installation completed successfully!"
+print_status "You may need to log out and log back in for group changes to take effect."
+print_status "Docker version:"
+docker --version
+
+exit 0
