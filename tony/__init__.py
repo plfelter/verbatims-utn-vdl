@@ -20,3 +20,8 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
+
+# Initialize database with data if needed
+from tony.database import DatabaseInitializer
+db_initializer = DatabaseInitializer(app)
+db_initializer.initialize_database()

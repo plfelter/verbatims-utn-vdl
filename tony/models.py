@@ -9,7 +9,7 @@ class Contribution(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     contributor = db.Column(db.String(80), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    time = db.Column(db.DateTime, default=datetime.utcnow)
+    time = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
         return f'<Contribution {self.id} by {self.contributor}>'
