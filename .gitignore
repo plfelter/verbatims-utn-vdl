@@ -3,4 +3,4 @@
 scripts/scrap-data/*
 !scripts/scrap-data/scrap-data-250430T165525/
 
-
+/notebooks/.ipynb_checkpoints/*

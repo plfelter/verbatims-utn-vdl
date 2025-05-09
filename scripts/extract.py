@@ -56,8 +56,10 @@ def extract_contributions(html_file):
             if user_match:
                 if 'Anonyme' in user_match.group(0):
                     contribution['user'] = 'Anonyme'
-                else:
-                    contribution['user'] = user_match.group(1).strip() if user_match.group(1) else 'Unknown'
+                if user_match.group(1):
+                    contribution['user'] = user_match.group(1).strip()
+            else:
+               contribution['user'] = 'Anonyme'
 
             # Extract post time
             time_match = re.search(r'Déposée\s+le\s+(.+)', user_info)
