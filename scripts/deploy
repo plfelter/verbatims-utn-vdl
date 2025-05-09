@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Deployment script to install the app on a remote server and start to serve it
+# Ensure the client computer has its public key on the remote deployment server
+
+SSH_PORT="58734"
+SSH_USER="ubuntu"
+SSH_HOST="162.19.242.144"
+GITHUB_REPO="https://github.com/plfelter/verbatims-utn-vdl.git"
+REMOTE_REPO_DIR="./verbatims-utn-vdl"
+LOCAL_DOCKER_INSTALL_SCRIPT_PATH="$HOME/dv/tony/scripts/install-docker-ubuntu"
+REMOTE_DOCKER_INSTALL_SCRIPT_PATH="/tmp/install-docker-ubuntu"
+HOST_PORT="80"
+CONTAINER_PORT="5001"
+DOCKER_IMAGE_NAME="tony-image"
+DOCKER_CONTAINER_NAME="tony-container"
+
+HOST="$SSH_USER@$SSH_HOST"
+
+
+# Remotely install docker if not available
+scp -P $SSH_PORT "$LOCAL_DOCKER_INSTALL_SCRIPT_PATH" $HOST:$REMOTE_DOCKER_INSTALL_SCRIPT_PATH
+ssh -p $SSH_PORT $HOST "bash $REMOTE_DOCKER_INSTALL_SCRIPT_PATH"
+
+# Remotely clone repo
+ssh -p $SSH_PORT $HOST "git clone $GITHUB_REPO"
+
+# Remotely stop running docker image
+docker stop $DOCKER_CONTAINER_NAME
+docker rm $DOCKER_CONTAINER_NAME
+
+# Remotely build docker image and run it
+ssh -p $SSH_PORT $HOST "docker build -t $DOCKER_IMAGE_NAME $REMOTE_REPO_DIR"
+ssh -p $SSH_PORT $HOST "docker run -p $HOST_PORT:$CONTAINER_PORT --name $DOCKER_CONTAINER_NAME $DOCKER_IMAGE_NAME"
