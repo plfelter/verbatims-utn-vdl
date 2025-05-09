@@ -62,11 +62,11 @@ body {
 
 .container {
     width: 100%;
+    box-sizing: border-box;
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    margin: 10px auto 10px;
+    padding: 1em;
     background-color: white;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     min-height: 100vh;
     animation: fadeIn 0.8s ease-out;
 }
@@ -171,9 +171,9 @@ tr:hover {
 form {
     margin-bottom: 20px;
     padding: 20px;
+    background-color: var(--light-gray);
     border: 1px solid var(--dark-gray);
     border-radius: var(--border-radius);
-    background-color: var(--light-gray);
     animation: fadeIn 0.7s ease-out;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -183,27 +183,42 @@ form:focus-within {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-input[type="text"], input[type="email"], textarea {
+/* Form Inputs Base Styles */
+input[type="text"],
+input[type="email"],
+textarea {
     width: 100%;
     padding: 10px;
+    box-sizing: border-box;
     margin-bottom: 15px;
     border: 1px solid var(--dark-gray);
     border-radius: var(--border-radius);
     font-family: inherit;
     font-size: 1rem;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    transition: all 0.3s ease;
 }
 
-input[type="text"]:hover, input[type="email"]:hover, textarea:hover {
+/* Form Inputs States */
+input[type="text"]:hover,
+input[type="email"]:hover,
+textarea:hover {
     border-color: var(--secondary-color);
 }
 
-input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
     transform: translateY(-2px);
 }
+
+/* Textarea Specific */
+textarea {
+    resize: vertical;
+}
+
 
 /* Buttons */
 button {
@@ -258,17 +273,6 @@ button:focus:not(:active)::after {
 }
 
 /* Discussion Page Styles */
-textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid var(--dark-gray);
-    border-radius: var(--border-radius);
-    font-family: inherit;
-    font-size: 1rem;
-    resize: vertical;
-}
-
 .comment {
     border: 1px solid var(--dark-gray);
     border-radius: var(--border-radius);
