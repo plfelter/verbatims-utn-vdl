@@ -26,8 +26,8 @@ ssh -p $SSH_PORT $HOST "bash $REMOTE_DOCKER_INSTALL_SCRIPT_PATH"
 ssh -p $SSH_PORT $HOST "git clone $GITHUB_REPO"
 
 # Remotely stop running docker image
-docker stop $DOCKER_CONTAINER_NAME
-docker rm $DOCKER_CONTAINER_NAME
+ssh -p $SSH_PORT $HOST "docker stop $DOCKER_CONTAINER_NAME"
+ssh -p $SSH_PORT $HOST "docker rm $DOCKER_CONTAINER_NAME"
 
 # Remotely build docker image and run it
 ssh -p $SSH_PORT $HOST "docker build -t $DOCKER_IMAGE_NAME $REMOTE_REPO_DIR"
