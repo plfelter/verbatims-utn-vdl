@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Contributions - Tony App{% endblock %}
+
+{% block content %}
+    <div id="contributions-container">
+        <h1>Contributions</h1>
+
+        <!-- Contributions Table -->
+        <div id="contributions-table">
+            <h2>Toutes les contributions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numero</th>
+                        <th>Auteur</th>
+                        <th>Contribution</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in contributions %}
+                    <tr>
+                        <td>{{ c.id }}</td>
+                        <td>{{ c.contributor }}</td>
+                        <td>{{ c.body }}</td>
+                        <td>{{ c.time }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
