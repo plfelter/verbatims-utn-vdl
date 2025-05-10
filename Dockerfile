@@ -29,6 +29,8 @@ RUN poetry install --no-interaction --no-ansi --without dev --no-root
 # Copy the rest of the application (that might have changed since previous build)
 COPY . .
 
+# TODO copy latest version of the sqlite database
+
 # Expose the port the app runs on
 EXPOSE 5001
 
