@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# Deployment script to install the app on a remote server and start to serve it
+# Prerequisite: ensure the client computer has its public key on the remote deployment server
+
+# Function to print formatted messages
+print_message() {
+    echo -e "\n\033[1;34m==>\033[0m \033[1m$1\033[0m"
+}
+
+# Function to print success messages
+print_success() {
+    echo -e "\033[1;32m✓\033[0m $1"
+}
+
+# Function to print error messages
+print_error() {
+    echo -e "\033[1;31m✗\033[0m $1"
+    exit 1
+}
+
+print_message "Starting deployment process"
+
+SSH_PORT="58734"
+SSH_USER="ubuntu"
+SSH_HOST="162.19.242.144"
+GITHUB_REPO="https://github.com/plfelter/verbatims-utn-vdl.git"
+REMOTE_REPO_DIR="/home/ubuntu/verbatims-utn-vdl"
+LOCAL_DOCKER_INSTALL_SCRIPT_PATH="$HOME/dv/verbatims-utn-vdl/scripts/install-docker-ubuntu"
+REMOTE_DOCKER_INSTALL_SCRIPT_PATH="/tmp/install-docker-ubuntu"
+HOST_PORT="80"
+CONTAINER_PORT="5001"
+DOCKER_IMAGE_NAME="verbatims-utn-vdl-image"
+DOCKER_CONTAINER_NAME="verbatims-utn-vdl-container"
+DOCKER_APP_DB_PATH="/verbatims-utn-vdl-app/app/sqlite.db"
+DOCKER_TMP_BACKUP_DB_PATH="/tmp/verbatims-utn-vdl-$(date +"%Y%m%d_%H%M%S")-sqlite.db"
+LOCAL_BACKUP_DB_PATH="$HOME/dv/verbatims-utn-vdl/db-backups/"
+
+HOST="$SSH_USER@$SSH_HOST"
+
+print_message "Configuring deployment to $HOST on port $SSH_PORT"
+
+# Remotely install docker if not available
+print_message "Installing Docker on remote server"
+echo "Copying Docker installation script to remote server..."
+if scp -P $SSH_PORT "$LOCAL_DOCKER_INSTALL_SCRIPT_PATH" $HOST:$REMOTE_DOCKER_INSTALL_SCRIPT_PATH; then
+    print_success "Docker installation script copied to $REMOTE_DOCKER_INSTALL_SCRIPT_PATH"
+else
+    print_error "Failed to copy Docker installation script"
+fi
+
+echo "Running Docker installation script on remote server..."
+if ssh -p $SSH_PORT $HOST "bash $REMOTE_DOCKER_INSTALL_SCRIPT_PATH"; then
+    print_success "Docker installation completed"
+else
+    print_error "Docker installation failed"
+fi
+
+# Remotely clone repo
+print_message "Cloning repository on remote server"
+echo "Checking for existing repository directory..."
+if ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "if [ -d $REMOTE_REPO_DIR ]; then rm -rf $REMOTE_REPO_DIR; echo 'Removed existing repository directory'; else echo 'Repository directory does not exist'; fi"; then
+    print_success "Repository directory checked"
+else
+    print_error "Failed to check repository directory"
+fi
+
+echo "Cloning repository from $GITHUB_REPO..."
+if ssh -p $SSH_PORT $HOST "git clone $GITHUB_REPO"; then
+    print_success "Repository cloned to $REMOTE_REPO_DIR"
+else
+    print_error "Failed to clone repository"
+fi
+
+# Remotely save database
+print_message "Backing up database from existing container"
+echo "Copying database from container to temporary location on remote server..."
+if ssh -p $SSH_PORT $HOST "docker cp $DOCKER_CONTAINER_NAME:$DOCKER_APP_DB_PATH $DOCKER_TMP_BACKUP_DB_PATH 2>/dev/null || echo 'No existing container to backup from'"; then
+    print_success "Database copied to temporary location: $DOCKER_TMP_BACKUP_DB_PATH"
+else
+    echo "Warning: Could not backup database from container. This might be normal for first deployment."
+fi
+
+echo "Copying database backup to local machine..."
+if scp -p -P $SSH_PORT $HOST:"$DOCKER_TMP_BACKUP_DB_PATH" "$LOCAL_BACKUP_DB_PATH" 2>/dev/null; then
+    print_success "Database backup saved to $LOCAL_BACKUP_DB_PATH"
+else
+    echo "Warning: Could not copy database backup to local machine. This might be normal for first deployment."
+fi
+
+# Remotely stop running docker image
+print_message "Stopping and removing existing Docker container"
+echo "Stopping container $DOCKER_CONTAINER_NAME..."
+if ssh -p $SSH_PORT $HOST "docker stop $DOCKER_CONTAINER_NAME 2>/dev/null || echo 'No container to stop'"; then
+    print_success "Container stopped"
+else
+    echo "Warning: Could not stop container. This might be normal for first deployment."
+fi
+
+echo "Removing container $DOCKER_CONTAINER_NAME..."
+if ssh -p $SSH_PORT $HOST "docker rm $DOCKER_CONTAINER_NAME 2>/dev/null || echo 'No container to remove'"; then
+    print_success "Container removed"
+else
+    echo "Warning: Could not remove container. This might be normal for first deployment."
+fi
+
+# Remotely build docker image and run it
+print_message "Building and running Docker container"
+echo "Building Docker image $DOCKER_IMAGE_NAME..."
+if ssh -p $SSH_PORT $HOST "docker build -t $DOCKER_IMAGE_NAME $REMOTE_REPO_DIR"; then
+    print_success "Docker image built successfully"
+else
+    print_error "Failed to build Docker image"
+fi
+
+echo "Running Docker container $DOCKER_CONTAINER_NAME on port $HOST_PORT..."
+if ssh -p $SSH_PORT $HOST "docker run --detach -p $HOST_PORT:$CONTAINER_PORT --name $DOCKER_CONTAINER_NAME $DOCKER_IMAGE_NAME"; then
+    print_success "Docker container started successfully"
+else
+    print_error "Failed to start Docker container"
+fi
+
+# Restore database to new container
+print_message "Restoring database to new container"
+echo "Copying database backup to new container..."
+if ssh -p $SSH_PORT $HOST "docker cp $DOCKER_TMP_BACKUP_DB_PATH $DOCKER_CONTAINER_NAME:$DOCKER_APP_DB_PATH 2>/dev/null"; then
+    print_success "Database restored successfully"
+else
+    echo "Warning: Could not restore database. This might be normal for first deployment."
+fi
+
+print_message "Deployment completed successfully!"
+echo "Application is now running at http://$SSH_HOST:$HOST_PORT"
