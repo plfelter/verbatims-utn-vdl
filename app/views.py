@@ -1,6 +1,41 @@
 from flask import render_template, request, jsonify, redirect, url_for
+from markupsafe import Markup
 from app import app, db
 from app.models import Contribution, Comment
+from sqlalchemy import or_
+import re
+
+
+def highlight_keywords(text, keywords):
+    """
+    Highlight keywords in text by wrapping them in span tags with a highlight class.
+
+    Args:
+        text (str): The text to search in
+        keywords (list): List of keywords to highlight
+
+    Returns:
+        Markup: HTML-safe string with highlighted keywords
+    """
+    if not keywords or not text:
+        return Markup(text)
+
+    # Convert text to string if it's not already
+    text = str(text)
+
+    # Create a copy of the text for highlighting
+    highlighted_text = text
+
+    # Sort keywords by length (longest first) to avoid partial matches
+    sorted_keywords = sorted(keywords, key=len, reverse=True)
+
+    for keyword in sorted_keywords:
+        # Use regex for case-insensitive matching
+        pattern = re.compile(re.escape(keyword), re.IGNORECASE)
+        # Replace with the same text wrapped in a highlight span
+        highlighted_text = pattern.sub(lambda m: f'<span class="keyword-highlight">{m.group(0)}</span>', highlighted_text)
+
+    return Markup(highlighted_text)
 
 
 @app.route('/')
@@ -12,9 +47,143 @@ def index():
 @app.route('/contributions', methods=['GET'])
 def get_contributions():
     """Get all contributions displayed dynamically with HTMX."""
-    # Get all users
-    contribs = Contribution.query.all()
-    return render_template('contributions.html', contributions=contribs)
+    # Get first page of contributions (20 items)
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+
+    # Get all contributions with pagination
+    contribs = Contribution.query.order_by(Contribution.id).limit(per_page).all()
+
+    # Format contributions as tuples (original, highlighted) where highlighted is None
+    # This is to maintain consistency with the search routes
+    formatted_contribs = [(contrib, None) for contrib in contribs]
+
+    # Check if there are more contributions
+    has_more = len(contribs) == per_page and Contribution.query.count() > per_page
+
+    return render_template('contributions.html', 
+                          contributions=formatted_contribs, 
+                          page=page,
+                          has_more=has_more,
+                          search_query=None,
+                          keywords=[])
+
+
+@app.route('/search-contributions', methods=['POST'])
+def search_contributions():
+    """Search contributions by keywords."""
+    search_query = request.form.get('search', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+
+    if search_query:
+        # Split the search query into keywords
+        keywords = search_query.split()
+
+        # Create a query that searches for contributions containing all keywords
+        query = Contribution.query
+
+        for keyword in keywords:
+            # Search in all fields
+            query = query.filter(
+                or_(
+                    Contribution.contributor.ilike(f'%{keyword}%'),
+                    Contribution.body.ilike(f'%{keyword}%'),
+                    # Convert ID to string for searching
+                    Contribution.id.cast(db.String).ilike(f'%{keyword}%')
+                )
+            )
+
+        # Get results with pagination
+        contribs = query.order_by(Contribution.id).limit(per_page).all()
+
+        # Create highlighted versions of the contribution fields
+        highlighted_contribs = []
+        for contrib in contribs:
+            # Create a copy of the contribution with highlighted text
+            highlighted_contrib = {
+                'id': highlight_keywords(contrib.id, keywords),
+                'contributor': highlight_keywords(contrib.contributor, keywords),
+                'body': highlight_keywords(contrib.body, keywords),
+                'time': contrib.time  # No need to highlight the time
+            }
+            highlighted_contribs.append((contrib, highlighted_contrib))
+
+        # Check if there are more results
+        has_more = len(contribs) == per_page and query.count() > per_page
+    else:
+        # If no search query, return all contributions without highlighting
+        contribs = Contribution.query.order_by(Contribution.id).limit(per_page).all()
+        highlighted_contribs = [(contrib, None) for contrib in contribs]
+        has_more = len(contribs) == per_page and Contribution.query.count() > per_page
+        keywords = []
+
+    # Return only the contributions content for HTMX
+    return render_template('contributions_content.html', 
+                          contributions=highlighted_contribs, 
+                          page=page,
+                          has_more=has_more,
+                          search_query=search_query,
+                          keywords=keywords if search_query else [])
+
+
+@app.route('/more-contributions', methods=['GET'])
+def get_more_contributions():
+    """Get more contributions for infinite scrolling."""
+    page = request.args.get('page', 1, type=int)
+    search_query = request.args.get('search', '')
+    per_page = 20
+    offset = (page - 1) * per_page
+
+    if search_query:
+        # Split the search query into keywords
+        keywords = search_query.split()
+
+        # Create a query that searches for contributions containing all keywords
+        query = Contribution.query
+
+        for keyword in keywords:
+            # Search in all fields
+            query = query.filter(
+                or_(
+                    Contribution.contributor.ilike(f'%{keyword}%'),
+                    Contribution.body.ilike(f'%{keyword}%'),
+                    # Convert ID to string for searching
+                    Contribution.id.cast(db.String).ilike(f'%{keyword}%')
+                )
+            )
+
+        # Get results with pagination
+        contribs = query.order_by(Contribution.id).offset(offset).limit(per_page).all()
+
+        # Create highlighted versions of the contribution fields
+        highlighted_contribs = []
+        for contrib in contribs:
+            # Create a copy of the contribution with highlighted text
+            highlighted_contrib = {
+                'id': highlight_keywords(contrib.id, keywords),
+                'contributor': highlight_keywords(contrib.contributor, keywords),
+                'body': highlight_keywords(contrib.body, keywords),
+                'time': contrib.time  # No need to highlight the time
+            }
+            highlighted_contribs.append((contrib, highlighted_contrib))
+
+        # Check if there are more results
+        has_more = len(contribs) == per_page and query.count() > offset + per_page
+    else:
+        # If no search query, return all contributions without highlighting
+        contribs = Contribution.query.order_by(Contribution.id).offset(offset).limit(per_page).all()
+        highlighted_contribs = [(contrib, None) for contrib in contribs]
+        has_more = len(contribs) == per_page and Contribution.query.count() > offset + per_page
+        keywords = []
+
+    # Return only the rows for the next page
+    return render_template('contributions_rows.html', 
+                          contributions=highlighted_contribs, 
+                          page=page,
+                          has_more=has_more,
+                          search_query=search_query,
+                          keywords=keywords if search_query else [])
 
 
 @app.route('/discussion', methods=['GET', 'POST'])

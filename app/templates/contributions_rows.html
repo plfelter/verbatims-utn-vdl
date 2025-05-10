@@ -1,0 +1,28 @@
+{% for c, highlighted in contributions %}
+<div class="contribution-cell expandable-cell">
+    <div class="cell-content">
+        <div class="cell-preview">
+            <div class="contribution-id"><strong>ID:</strong> {% if highlighted %}{{ highlighted.id }}{% else %}{{ c.id }}{% endif %}</div>
+            <div class="contribution-author"><strong>Auteur:</strong> {% if highlighted %}{{ highlighted.contributor|truncate(50) }}{% else %}{{ c.contributor|truncate(20) }}{% endif %}</div>
+            <div class="contribution-body"><strong>Contribution:</strong> {% if highlighted %}{{ highlighted.body|truncate(100) }}{% else %}{{ c.body|truncate(50) }}{% endif %}</div>
+            <div class="contribution-date"><strong>Date:</strong> {{ c.time.strftime('%Y-%m-%d') }}</div>
+        </div>
+        <div class="cell-full">
+            <div class="contribution-id"><strong>ID:</strong> {% if highlighted %}{{ highlighted.id }}{% else %}{{ c.id }}{% endif %}</div>
+            <div class="contribution-author"><strong>Auteur:</strong> {% if highlighted %}{{ highlighted.contributor }}{% else %}{{ c.contributor }}{% endif %}</div>
+            <div class="contribution-body"><strong>Contribution:</strong> {% if highlighted %}{{ highlighted.body }}{% else %}{{ c.body }}{% endif %}</div>
+            <div class="contribution-date"><strong>Date:</strong> {{ c.time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+        </div>
+        <button class="toggle-expand" onclick="toggleExpand(this)">+</button>
+    </div>
+</div>
+{% if loop.last and loop.index >= 20 and has_more %}
+<div class="loading-cell" 
+     hx-get="{{ url_for('get_more_contributions', page=(page or 1) + 1, search=search_query) }}"
+     hx-trigger="revealed"
+     hx-swap="beforeend"
+     hx-target=".contributions-grid">
+    Loading more contributions...
+</div>
+{% endif %}
+{% endfor %}
