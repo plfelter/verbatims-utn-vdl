@@ -11,7 +11,10 @@
 ## Developpement opérationnel
 
 - [ ] Définir, implémenter et documenter la stratégie de sauvegarde de la database (récurrent, mises à jour de l'app...)
+  - [ ] Sauvegarde récurrente
+  - [x] Sauvegarde avant mise à jour
 - [ ] Certificat Let's Encrypt et HTTPS
+- [ ] Utiliser Gunicorn et Apache/Nginx
 - [x] Lier nom de domain webpil.ovh à l'IP du serveur
 
 ### Example syntax
