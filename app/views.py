@@ -44,45 +44,24 @@ def index():
     return redirect(url_for('get_contributions'))
 
 
-@app.route('/contributions', methods=['GET'])
-def get_contributions():
-    """Get all contributions displayed dynamically with HTMX."""
-    # Get first page of contributions (20 items)
-    page = request.args.get('page', 1, type=int)
-    per_page = 30
-
-    # Get all contributions with pagination
-    contribs = Contribution.query.order_by(Contribution.id).limit(per_page).all()
-
-    # Format contributions as tuples (original, highlighted) where highlighted is None
-    # This is to maintain consistency with the search routes
-    formatted_contribs = [(contrib, None) for contrib in contribs]
-
-    # Check if there are more contributions
-    has_more = len(contribs) == per_page and Contribution.query.count() > per_page
-
-    return render_template('contributions.html', 
-                          contributions=formatted_contribs, 
-                          page=page,
-                          has_more=has_more,
-                          search_query=None,
-                          keywords=[])
-
-
+@app.route('/contributions', methods=['GET', 'POST'])
 @app.route('/get-contributions', methods=['GET', 'POST'])
-def get_contributions_data():
+def get_contributions():
     """
-    Unified function to handle both searching contributions and loading more contributions.
-    - POST to /get-contributions: Initial search with form data
+    Unified function to handle both initial page load and dynamic content updates.
+    - GET to /contributions: Initial page load
+    - POST to /get-contributions: Search with form data
     - GET to /get-contributions: Load more results with pagination
     """
+    # Determine if this is a request for the full page or just the content
+    is_full_page = request.path == '/contributions' and request.method == 'GET'
 
     # Get search query from appropriate source based on request type
     search_query = request.form.get('search', '')
     page = request.args.get('page', 1, type=int)
 
     per_page = 30
-    offset = (page - 1) * per_page if not search_query else 0
+    offset = (page - 1) * per_page if page > 1 or not search_query else 0
 
     if search_query:
         # Split the search query into keywords
@@ -126,13 +105,21 @@ def get_contributions_data():
         has_more = len(contribs) == per_page and Contribution.query.count() > offset + per_page
         keywords = []
 
-    # Return the contributions content template
-    return render_template('contributions_content.html', 
-                          contributions=highlighted_contribs, 
-                          page=page,
-                          has_more=has_more,
-                          search_query=search_query,
-                          keywords=keywords if search_query else [])
+    # Return the appropriate template based on the request type
+    if is_full_page:
+        return render_template('contributions.html', 
+                              contributions=highlighted_contribs, 
+                              page=page,
+                              has_more=has_more,
+                              search_query=search_query,
+                              keywords=keywords if search_query else [])
+    else:
+        return render_template('contributions_content.html', 
+                              contributions=highlighted_contribs, 
+                              page=page,
+                              has_more=has_more,
+                              search_query=search_query,
+                              keywords=keywords if search_query else [])
 
 
 @app.route('/discussion', methods=['GET', 'POST'])
