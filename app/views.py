@@ -43,9 +43,8 @@ def index():
     """Home page route."""
     return redirect('/contributions')
 
-
-@app.route('/contributions', methods=['GET'])
 @app.route('/get-contributions', methods=['GET', 'POST'])
+@app.route('/contributions', methods=['GET'])
 def get_contributions():
     """
     Unified function to handle both initial page load and dynamic content updates.
