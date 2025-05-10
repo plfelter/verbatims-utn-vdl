@@ -16,7 +16,7 @@
             </h3>
             <input class="form-control" type="search"
                 name="search" placeholder="Type keywords to search contributions..."
-                hx-post="{{ url_for('search_contributions') }}"
+                hx-post="{{ url_for('get_contributions_data') }}"
                 hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
                 hx-target="#contributions-content"
                 hx-indicator=".htmx-indicator">

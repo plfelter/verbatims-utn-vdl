@@ -69,71 +69,26 @@ def get_contributions():
                           keywords=[])
 
 
-@app.route('/search-contributions', methods=['POST'])
-def search_contributions():
-    """Search contributions by keywords."""
-    search_query = request.form.get('search', '')
-    page = request.args.get('page', 1, type=int)
-    per_page = 20
+@app.route('/get-contributions', methods=['GET', 'POST'])
+def get_contributions_data():
+    """
+    Unified function to handle both searching contributions and loading more contributions.
+    - POST to /get-contributions: Initial search with form data
+    - GET to /get-contributions: Load more results with pagination
+    """
+    # Determine if this is a search request (POST) or a load more request (GET)
+    is_search_request = request.method == 'POST'
 
-    if search_query:
-        # Split the search query into keywords
-        keywords = search_query.split()
-
-        # Create a query that searches for contributions containing all keywords
-        query = Contribution.query
-
-        for keyword in keywords:
-            # Search in all fields
-            query = query.filter(
-                or_(
-                    Contribution.contributor.ilike(f'%{keyword}%'),
-                    Contribution.body.ilike(f'%{keyword}%'),
-                    # Convert ID to string for searching
-                    Contribution.id.cast(db.String).ilike(f'%{keyword}%')
-                )
-            )
-
-        # Get results with pagination
-        contribs = query.order_by(Contribution.id).limit(per_page).all()
-
-        # Create highlighted versions of the contribution fields
-        highlighted_contribs = []
-        for contrib in contribs:
-            # Create a copy of the contribution with highlighted text
-            highlighted_contrib = {
-                'id': highlight_keywords(contrib.id, keywords),
-                'contributor': highlight_keywords(contrib.contributor, keywords),
-                'body': highlight_keywords(contrib.body, keywords),
-                'time': contrib.time  # No need to highlight the time
-            }
-            highlighted_contribs.append((contrib, highlighted_contrib))
-
-        # Check if there are more results
-        has_more = len(contribs) == per_page and query.count() > per_page
+    # Get search query from appropriate source based on request type
+    if is_search_request:
+        search_query = request.form.get('search', '')
+        page = 1  # Always start at page 1 for new searches
     else:
-        # If no search query, return all contributions without highlighting
-        contribs = Contribution.query.order_by(Contribution.id).limit(per_page).all()
-        highlighted_contribs = [(contrib, None) for contrib in contribs]
-        has_more = len(contribs) == per_page and Contribution.query.count() > per_page
-        keywords = []
+        search_query = request.args.get('search', '')
+        page = request.args.get('page', 1, type=int)
 
-    # Return only the contributions content for HTMX
-    return render_template('contributions_content.html', 
-                          contributions=highlighted_contribs, 
-                          page=page,
-                          has_more=has_more,
-                          search_query=search_query,
-                          keywords=keywords if search_query else [])
-
-
-@app.route('/more-contributions', methods=['GET'])
-def get_more_contributions():
-    """Get more contributions for infinite scrolling."""
-    page = request.args.get('page', 1, type=int)
-    search_query = request.args.get('search', '')
     per_page = 20
-    offset = (page - 1) * per_page
+    offset = (page - 1) * per_page if not is_search_request else 0
 
     if search_query:
         # Split the search query into keywords
@@ -177,7 +132,7 @@ def get_more_contributions():
         has_more = len(contribs) == per_page and Contribution.query.count() > offset + per_page
         keywords = []
 
-    # Return only the rows for the next page
+    # Return the contributions content template
     return render_template('contributions_content.html', 
                           contributions=highlighted_contribs, 
                           page=page,
