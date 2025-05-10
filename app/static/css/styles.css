@@ -389,7 +389,7 @@ button:focus:not(:active)::after {
 /* Text truncation classes */
 .truncate-text {
     white-space: nowrap;
-    overflow: hidden;
+    /*overflow: hidden;*/
     text-overflow: ellipsis;
     max-width: 100%;
     display: inline-block;
