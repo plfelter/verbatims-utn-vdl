@@ -17,7 +17,7 @@
             <button class="toggle-expand" onclick="toggleExpand(this)">+</button>
         </div>
     </div>
-    {% if loop.last and loop.index >= 20 and has_more %}
+    {% if loop.last and has_more %}
     <div class="loading-cell" 
          hx-get="{{ url_for('get_contributions_data', page=(page or 1) + 1, search=search_query) }}"
          hx-trigger="revealed"

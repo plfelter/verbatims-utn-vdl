@@ -76,19 +76,13 @@ def get_contributions_data():
     - POST to /get-contributions: Initial search with form data
     - GET to /get-contributions: Load more results with pagination
     """
-    # Determine if this is a search request (POST) or a load more request (GET)
-    is_search_request = request.method == 'POST'
 
     # Get search query from appropriate source based on request type
-    if is_search_request:
-        search_query = request.form.get('search', '')
-        page = 1  # Always start at page 1 for new searches
-    else:
-        search_query = request.args.get('search', '')
-        page = request.args.get('page', 1, type=int)
+    search_query = request.form.get('search', '')
+    page = request.args.get('page', 1, type=int)
 
     per_page = 20
-    offset = (page - 1) * per_page if not is_search_request else 0
+    offset = (page - 1) * per_page if not search_query else 0
 
     if search_query:
         # Split the search query into keywords
