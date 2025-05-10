@@ -386,6 +386,39 @@ button:focus:not(:active)::after {
     margin-bottom: 15px;
 }
 
+/* Text truncation classes */
+.truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: inline-block;
+}
+
+.truncate-contributor {
+    max-width: 20ch;
+}
+
+.truncate-contributor-highlighted {
+    max-width: 50ch;
+}
+
+.truncate-body {
+    max-width: 50ch;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.truncate-body-highlighted {
+    max-width: 100ch;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .expandable-cell {
     position: relative;
 }

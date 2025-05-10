@@ -3,8 +3,8 @@
     <div class="cell-content">
         <div class="cell-preview">
             <div class="contribution-id">Contribution n&#186; {% if highlighted %}{{ highlighted.id }}{% else %}{{ c.id }}{% endif %}</div>
-            <div class="contribution-author">Auteur {% if highlighted %}{{ highlighted.contributor|truncate(50) }}{% else %}{{ c.contributor|truncate(20) }}{% endif %}</div>
-            <div class="contribution-body">{% if highlighted %}{{ highlighted.body|truncate(100) }}{% else %}{{ c.body|truncate(50) }}{% endif %}</div>
+            <div class="contribution-author">Auteur {% if highlighted %}<span class="truncate-text truncate-contributor-highlighted">{{ highlighted.contributor }}</span>{% else %}<span class="truncate-text truncate-contributor">{{ c.contributor }}</span>{% endif %}</div>
+            <div class="contribution-body">{% if highlighted %}<span class="truncate-body-highlighted">{{ highlighted.body }}</span>{% else %}<span class="truncate-body">{{ c.body }}</span>{% endif %}</div>
             <div class="contribution-date">{{ c.time.strftime('Le %d/%m/%Y à %Hh%M') }}</div>
         </div>
         <div class="cell-full">
@@ -16,7 +16,9 @@
         <button class="toggle-expand" onclick="toggleExpand(this)">+</button>
     </div>
 </div>
-{% if loop.last and has_more %}
+{% endfor %}
+
+{% if has_more %}
 <div class="loading-cell"
      hx-get="{{ url_for('get_contributions', page=(page or 1) + 1, search=search_query) }}"
      hx-trigger="revealed"
@@ -25,7 +27,6 @@
     Chargement des contributions...
 </div>
 {% endif %}
-{% endfor %}
 
 {% if not contributions %}
 <div class="no-results">Fin de la liste de résultats.</div>
