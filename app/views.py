@@ -1,6 +1,6 @@
 from flask import render_template, request, jsonify, redirect, url_for
-from tony import app, db
-from tony.models import Contribution, Comment
+from app import app, db
+from app.models import Contribution, Comment
 
 
 @app.route('/')

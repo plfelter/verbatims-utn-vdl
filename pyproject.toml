@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tony"
+name = "verbatims-utn-vdl"
 version = "0.1.0"
 description = ""
 authors = ["plfelter <hurdle0.foggier@icloud.com>"]

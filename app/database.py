@@ -2,8 +2,8 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from tony import db
-from tony.models import Contribution
+from app import db
+from app.models import Contribution
 
 
 class DatabaseInitializer:

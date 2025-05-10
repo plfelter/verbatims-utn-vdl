@@ -6,9 +6,9 @@ from pathlib import Path
 # Add the parent directory to the Python path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from tony import app, db
-from tony.models import Contribution
-from tony.database import DatabaseInitializer
+from app import app, db
+from app.models import Contribution
+from app.database import DatabaseInitializer
 
 
 class TestDatabaseInitializer(unittest.TestCase):
