@@ -44,7 +44,7 @@ def index():
     return redirect('/contributions')
 
 
-@app.route('/contributions', methods=['GET', 'POST'])
+@app.route('/contributions', methods=['GET'])
 @app.route('/get-contributions', methods=['GET', 'POST'])
 def get_contributions():
     """
@@ -54,7 +54,7 @@ def get_contributions():
     - GET to /get-contributions: Load more results with pagination
     """
     # Determine if this is a request for the full page or just the content
-    is_full_page = request.path == '/contributions' and request.method == 'GET'
+    is_full_page = request.path == '/contributions'
 
     # Get search query from appropriate source based on request type
     search_query = request.form.get('search', '')
