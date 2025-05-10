@@ -2,7 +2,7 @@
 FROM python:3.10-slim-bullseye
 
 # Set working directory in the container
-WORKDIR /app
+WORKDIR /verbatims-utn-vdl-app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
