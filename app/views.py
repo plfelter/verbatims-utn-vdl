@@ -43,22 +43,18 @@ def index():
     """Home page route."""
     return redirect('/contributions')
 
-@app.route('/get-contributions', methods=['GET', 'POST'])
-@app.route('/contributions', methods=['GET'])
-def get_contributions():
+def get_contributions_data(search_query='', page=1):
     """
-    Unified function to handle both initial page load and dynamic content updates.
-    - GET to /contributions: Initial page load
-    - POST to /get-contributions: Search with form data
-    - GET to /get-contributions: Load more results with pagination
+    Helper function to fetch and process contributions data.
+    Used by both the contributions and get-contributions routes.
+
+    Args:
+        search_query (str): The search query to filter contributions
+        page (int): The page number for pagination
+
+    Returns:
+        tuple: (highlighted_contribs, page, has_more, search_query, keywords)
     """
-    # Determine if this is a request for the full page or just the content
-    is_full_page = request.path == '/contributions'
-
-    # Get search query from appropriate source based on request type
-    search_query = request.form.get('search', '')
-    page = request.args.get('page', 1, type=int)
-
     per_page = 30
     offset = (page - 1) * per_page if page > 1 or not search_query else 0
 
@@ -104,21 +100,47 @@ def get_contributions():
         has_more = len(contribs) == per_page and Contribution.query.count() > offset + per_page
         keywords = []
 
-    # Return the appropriate template based on the request type
-    if is_full_page:
-        return render_template('contributions.html', 
-                              contributions=highlighted_contribs, 
-                              page=page,
-                              has_more=has_more,
-                              search_query=search_query,
-                              keywords=keywords if search_query else [])
-    else:
-        return render_template('contributions_content.html', 
-                              contributions=highlighted_contribs, 
-                              page=page,
-                              has_more=has_more,
-                              search_query=search_query,
-                              keywords=keywords if search_query else [])
+    return highlighted_contribs, page, has_more, search_query, keywords if search_query else []
+
+
+@app.route('/contributions', methods=['GET'])
+def contributions():
+    """
+    Route for the initial page load of contributions.
+    - GET to /contributions: Initial page load with full HTML template
+    """
+    page = request.args.get('page', 1, type=int)
+    search_query = request.args.get('search', '')
+
+    highlighted_contribs, page, has_more, search_query, keywords = get_contributions_data(search_query, page)
+
+    return render_template('contributions.html', 
+                          contributions=highlighted_contribs, 
+                          page=page,
+                          has_more=has_more,
+                          search_query=search_query,
+                          keywords=keywords)
+
+
+@app.route('/get-contributions', methods=['GET', 'POST'])
+def get_contributions():
+    """
+    Route for dynamic content updates.
+    - POST to /get-contributions: Search with form data
+    - GET to /get-contributions: Load more results with pagination
+    """
+    # Get search query from appropriate source based on request type
+    search_query = request.form.get('search', request.args.get('search', ''))
+    page = request.args.get('page', 1, type=int)
+
+    highlighted_contribs, page, has_more, search_query, keywords = get_contributions_data(search_query, page)
+
+    return render_template('contributions_content.html', 
+                          contributions=highlighted_contribs, 
+                          page=page,
+                          has_more=has_more,
+                          search_query=search_query,
+                          keywords=keywords)
 
 
 @app.route('/discussion', methods=['GET', 'POST'])
