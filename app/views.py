@@ -41,7 +41,7 @@ def highlight_keywords(text, keywords):
 @app.route('/')
 def index():
     """Home page route."""
-    return redirect(url_for('get_contributions'))
+    return redirect('/contributions')
 
 
 @app.route('/contributions', methods=['GET', 'POST'])
