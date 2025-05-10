@@ -178,7 +178,7 @@ def get_more_contributions():
         keywords = []
 
     # Return only the rows for the next page
-    return render_template('contributions_rows.html', 
+    return render_template('contributions_content.html', 
                           contributions=highlighted_contribs, 
                           page=page,
                           has_more=has_more,
