@@ -1,54 +1,72 @@
-/* Global Styles */
+/* 
+ * STYLES.CSS
+ * Main stylesheet for the application
+ */
+
+/* ===== VARIABLES ===== */
 :root {
     --primary-color: #3498db;
     --secondary-color: #2980b9;
     --accent-color: #e74c3c;
+    --success-color: #27ae60;
     --text-color: #333;
     --light-gray: #f8f9fa;
     --medium-gray: #e9ecef;
     --dark-gray: #dee2e6;
     --border-radius: 5px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 2px 5px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --transition-fast: all 0.2s ease;
+    --transition-normal: all 0.3s ease;
 }
 
-/* Animations */
+/* ===== ANIMATIONS ===== */
 @keyframes backgroundGradient {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 @keyframes buttonPulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 rgba(52, 152, 219, 0.4);
-    }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 0 10px rgba(52, 152, 219, 0.6);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 rgba(52, 152, 219, 0.4);
-    }
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(52, 152, 219, 0.4); }
+    50% { transform: scale(1.05); box-shadow: 0 0 10px rgba(52, 152, 219, 0.6); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(52, 152, 219, 0.4); }
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes navShine {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes ripple {
+    0% { transform: scale(0, 0); opacity: 0.5; }
+    100% { transform: scale(20, 20); opacity: 0; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes highlightPulse {
+    0% { background-color: rgba(255, 255, 0, 0.4); }
+    50% { background-color: rgba(255, 255, 0, 0.6); }
+    100% { background-color: rgba(255, 255, 0, 0.4); }
+}
+
+/* ===== BASE STYLES ===== */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
@@ -62,24 +80,24 @@ body {
 
 .container {
     width: 100%;
-    box-sizing: border-box;
     max-width: 1200px;
-    margin: 10px auto 10px;
-    padding: 1em;
-    background-color: white;
     min-height: 100vh;
+    margin: 10px auto;
+    padding: 1em;
+    box-sizing: border-box;
+    background-color: white;
     animation: fadeIn 0.8s ease-out;
 }
 
-/* Navigation */
+/* ===== NAVIGATION ===== */
 nav {
+    position: relative;
     margin-bottom: 20px;
     padding: 15px;
     background-color: var(--primary-color);
     border-radius: var(--border-radius);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
     animation: fadeIn 0.6s ease-out;
-    position: relative;
     overflow: hidden;
 }
 
@@ -95,34 +113,25 @@ nav::before {
     pointer-events: none;
 }
 
-@keyframes navShine {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
 nav a {
+    position: relative;
+    display: inline-block;
     margin-right: 20px;
-    text-decoration: none;
     color: white;
     font-weight: bold;
-    transition: color 0.3s ease, transform 0.3s ease;
-    display: inline-block;
-    position: relative;
+    text-decoration: none;
+    transition: var(--transition-normal);
 }
 
 nav a::after {
     content: '';
     position: absolute;
     width: 100%;
-    transform: scaleX(0);
     height: 2px;
     bottom: -4px;
     left: 0;
     background-color: white;
+    transform: scaleX(0);
     transform-origin: bottom right;
     transition: transform 0.3s ease-out;
 }
@@ -137,12 +146,12 @@ nav a:hover::after {
     transform-origin: bottom left;
 }
 
-/* Tables */
+/* ===== TABLES ===== */
 table {
     width: 100%;
-    border-collapse: collapse;
     margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-collapse: collapse;
+    box-shadow: var(--shadow-md);
 }
 
 table, th, td {
@@ -167,7 +176,7 @@ tr:hover {
     background-color: var(--medium-gray);
 }
 
-/* Forms */
+/* ===== FORMS ===== */
 form {
     margin-bottom: 20px;
     padding: 20px;
@@ -175,7 +184,7 @@ form {
     border: 1px solid var(--dark-gray);
     border-radius: var(--border-radius);
     animation: fadeIn 0.7s ease-out;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: var(--transition-normal);
 }
 
 form:focus-within {
@@ -183,22 +192,20 @@ form:focus-within {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-/* Form Inputs Base Styles */
 input[type="text"],
 input[type="email"],
 textarea {
     width: 100%;
     padding: 10px;
-    box-sizing: border-box;
     margin-bottom: 15px;
-    border: 1px solid var(--dark-gray);
-    border-radius: var(--border-radius);
     font-family: inherit;
     font-size: 1rem;
-    transition: all 0.3s ease;
+    border: 1px solid var(--dark-gray);
+    border-radius: var(--border-radius);
+    box-sizing: border-box;
+    transition: var(--transition-normal);
 }
 
-/* Form Inputs States */
 input[type="text"]:hover,
 input[type="email"]:hover,
 textarea:hover {
@@ -214,24 +221,22 @@ textarea:focus {
     transform: translateY(-2px);
 }
 
-/* Textarea Specific */
 textarea {
     resize: vertical;
 }
 
-
-/* Buttons */
+/* ===== BUTTONS ===== */
 button {
-    background-color: var(--primary-color);
-    color: white;
+    position: relative;
     padding: 10px 15px;
+    font-size: 1rem;
+    color: white;
+    background-color: var(--primary-color);
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    font-size: 1rem;
-    position: relative;
     overflow: hidden;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
@@ -261,27 +266,16 @@ button:focus:not(:active)::after {
     animation: ripple 1s ease-out;
 }
 
-@keyframes ripple {
-    0% {
-        transform: scale(0, 0);
-        opacity: 0.5;
-    }
-    100% {
-        transform: scale(20, 20);
-        opacity: 0;
-    }
-}
-
-/* Discussion Page Styles */
+/* ===== DISCUSSION PAGE ===== */
 .comment {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: white;
     border: 1px solid var(--dark-gray);
     border-radius: var(--border-radius);
-    padding: 15px;
-    margin-bottom: 15px;
-    background-color: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     animation: fadeIn 0.5s ease-out;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: var(--transition-normal);
 }
 
 .comment:hover {
@@ -318,11 +312,14 @@ button:focus:not(:active)::after {
     gap: 5px;
 }
 
-.upvote-button {
-    background-color: #4CAF50;
+.upvote-button, .downvote-button {
     padding: 5px 10px;
     font-size: 0.8rem;
-    transition: all 0.3s ease;
+    transition: var(--transition-normal);
+}
+
+.upvote-button {
+    background-color: #4CAF50;
 }
 
 .upvote-button:hover {
@@ -338,9 +335,6 @@ button:focus:not(:active)::after {
 
 .downvote-button {
     background-color: #666666;
-    padding: 5px 10px;
-    font-size: 0.8rem;
-    transition: all 0.3s ease;
 }
 
 .downvote-button:hover {
@@ -359,7 +353,7 @@ button:focus:not(:active)::after {
     font-size: 0.9rem;
 }
 
-/* Contributions Page Styles */
+/* ===== CONTRIBUTIONS PAGE ===== */
 .contributions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -368,23 +362,22 @@ button:focus:not(:active)::after {
 }
 
 .contribution-cell {
+    position: relative;
+    padding: 15px;
     background-color: white;
     border: 1px solid var(--dark-gray);
     border-radius: var(--border-radius);
-    padding: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
 }
 
 .contribution-cell:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
 }
 
 .contribution-id, 
 .contribution-author, 
-.contribution-body, 
 .contribution-date {
     margin-bottom: 8px;
 }
@@ -399,7 +392,7 @@ button:focus:not(:active)::after {
 
 .cell-content {
     position: relative;
-    transition: all 0.3s ease;
+    transition: var(--transition-normal);
 }
 
 .cell-preview {
@@ -423,22 +416,22 @@ button:focus:not(:active)::after {
 
 .toggle-expand {
     position: absolute;
-    right: 15px;
     top: 15px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    cursor: pointer;
+    right: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    width: 24px;
+    height: 24px;
     padding: 0;
+    font-size: 16px;
     line-height: 1;
-    transition: all 0.2s ease;
+    color: white;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition-fast);
 }
 
 .toggle-expand:hover {
@@ -448,22 +441,22 @@ button:focus:not(:active)::after {
 
 .loading-cell {
     grid-column: 1 / -1;
-    text-align: center;
+    margin-top: 10px;
     padding: 15px;
+    text-align: center;
     background-color: var(--light-gray);
     border-radius: var(--border-radius);
     font-style: italic;
-    margin-top: 10px;
 }
 
 .no-results {
     grid-column: 1 / -1;
-    text-align: center;
+    margin-top: 10px;
     padding: 20px;
+    text-align: center;
     background-color: var(--light-gray);
     border-radius: var(--border-radius);
     font-style: italic;
-    margin-top: 10px;
 }
 
 #search-container {
@@ -471,9 +464,10 @@ button:focus:not(:active)::after {
     padding: 15px;
     background-color: var(--light-gray);
     border-radius: var(--border-radius);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
 }
 
+/* ===== HTMX INDICATORS ===== */
 .htmx-indicator {
     display: none;
     margin-left: 10px;
@@ -482,60 +476,39 @@ button:focus:not(:active)::after {
     animation: fadeIn 0.3s ease-out;
 }
 
-.htmx-request .htmx-indicator {
-    display: inline-block;
-}
-
+.htmx-request .htmx-indicator,
 .htmx-request.htmx-indicator {
     display: inline-block;
 }
 
-/* Utility Classes */
+/* ===== UTILITY CLASSES ===== */
 .error {
-    color: var(--accent-color);
     margin-bottom: 10px;
     padding: 10px;
+    color: var(--accent-color);
     background-color: rgba(231, 76, 60, 0.1);
     border-left: 4px solid var(--accent-color);
     border-radius: var(--border-radius);
     animation: fadeIn 0.5s ease-out, shake 0.5s ease-out;
 }
 
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
 .success {
-    color: #27ae60;
     margin-bottom: 10px;
     padding: 10px;
+    color: var(--success-color);
     background-color: rgba(39, 174, 96, 0.1);
-    border-left: 4px solid #27ae60;
+    border-left: 4px solid var(--success-color);
     border-radius: var(--border-radius);
     animation: fadeIn 0.5s ease-out, slideIn 0.5s ease-out;
 }
 
-@keyframes slideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-/* Keyword highlighting */
 .keyword-highlight {
-    background-color: rgba(255, 255, 0, 0.4);
-    padding: 0 2px;
-    border-radius: 2px;
-    font-weight: bold;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
     display: inline-block;
+    padding: 0 2px;
+    font-weight: bold;
+    background-color: rgba(255, 255, 0, 0.4);
+    border-radius: 2px;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+    transition: var(--transition-normal);
     animation: highlightPulse 2s infinite;
-}
-
-@keyframes highlightPulse {
-    0% { background-color: rgba(255, 255, 0, 0.4); }
-    50% { background-color: rgba(255, 255, 0, 0.6); }
-    100% { background-color: rgba(255, 255, 0, 0.4); }
 }
