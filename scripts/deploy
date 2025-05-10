@@ -30,7 +30,7 @@ ssh -p $SSH_PORT $HOST "git clone $GITHUB_REPO"
 
 # Remotely save database
 ssh -p $SSH_PORT $HOST "docker cp $DOCKER_CONTAINER_NAME:$DOCKER_APP_DB_PATH $DOCKER_TMP_BACKUP_DB_PATH"
-scp -P $SSH_PORT -p $HOST:DOCKER_TMP_BACKUP_DB_PATH "$LOCAL_BACKUP_DB_PATH"
+scp -p -P $SSH_PORT $HOST:"$DOCKER_TMP_BACKUP_DB_PATH" "$LOCAL_BACKUP_DB_PATH"
 
 # Remotely stop running docker image
 ssh -p $SSH_PORT $HOST "docker stop $DOCKER_CONTAINER_NAME"
