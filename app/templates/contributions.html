@@ -3,31 +3,27 @@
 {% block title %}Contributions{% endblock %}
 
 {% block content %}
-    <div id="contributions-container">
-        <h1>Contributions</h1>
+<div id="contributions-container">
+    <h1>Contributions</h1>
 
-        <!-- Search Bar -->
-        <div id="search-container">
-            <h3>
-                Search Contributions
-                <span class="htmx-indicator">
-                    <img src="{{ url_for('static', filename='img/loading.svg') }}" alt="Loading..." /> Searching...
+    <!-- Search Bar -->
+    <div id="search-container">
+        <h3>
+            Search Contributions
+            <span class="htmx-indicator">
+                    <img src="{{ url_for('static', filename='img/loading.svg') }}" alt="Loading..."/> Searching...
                 </span>
-            </h3>
-            <input class="form-control" type="search"
-                name="search" placeholder="Type keywords to search contributions..."
-                hx-post="{{ url_for('get_contributions_data') }}"
-                hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
-                hx-target="#contributions-content"
-                hx-indicator=".htmx-indicator">
-        </div>
-
-        <!-- Contributions Table -->
-        <div id="contributions-table">
-            <h2>Toutes les contributions</h2>
-            <div id="contributions-content">
-                {% include 'contributions_content.html' with context %}
-            </div>
-        </div>
+        </h3>
+        <input class="form-control" type="search"
+               name="search" placeholder="Type keywords to search contributions..."
+               hx-post="{{ url_for('get_contributions_data') }}"
+               hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+               hx-target=".contributions-grid"
+               hx-indicator=".htmx-indicator">
     </div>
+
+    <div class="contributions-grid">
+        {% include 'contributions_content.html' with context %}
+    </div>
+</div>
 {% endblock %}

@@ -49,7 +49,7 @@ def get_contributions():
     """Get all contributions displayed dynamically with HTMX."""
     # Get first page of contributions (20 items)
     page = request.args.get('page', 1, type=int)
-    per_page = 20
+    per_page = 30
 
     # Get all contributions with pagination
     contribs = Contribution.query.order_by(Contribution.id).limit(per_page).all()
@@ -81,7 +81,7 @@ def get_contributions_data():
     search_query = request.form.get('search', '')
     page = request.args.get('page', 1, type=int)
 
-    per_page = 20
+    per_page = 30
     offset = (page - 1) * per_page if not search_query else 0
 
     if search_query:
