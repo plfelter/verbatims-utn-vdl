@@ -19,6 +19,7 @@
                hx-post="{{ url_for('get_contributions') }}"
                hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
                hx-target=".contributions-grid"
+               hx-swap="innerHTML"
                hx-indicator=".htmx-indicator">
     </div>
 
