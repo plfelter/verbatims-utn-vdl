@@ -3,8 +3,9 @@ from datetime import datetime
 import pytz
 from sqlalchemy import func
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql.expression import case
 
-from app import db
+from app import db, anonymise_contributors
 
 
 class SearchLog(db.Model):
@@ -19,7 +20,6 @@ class SearchLog(db.Model):
     def __repr__(self):
         return f'<SearchLog {self.id} from {self.ip_address}>'
 
-from app import anonymise_contributors
 
 class Contribution(db.Model):
     """Contribution model for storing verbatim data."""
@@ -44,6 +44,34 @@ class Contribution(db.Model):
                 return time_value.strftime(format_str)
         return func.strftime(format_str, self.time).label('formatted_time')
 
+    @hybrid_property
+    def anonymized_contributor(self):
+        """Return anonymized or genuine contributor name based on flag."""
+        if not anonymise_contributors:
+            return self.contributor
+
+        # Get actual contributor value
+        if hasattr(self, '_contributor') and self._contributor is not None:
+            contributor_value = self._contributor
+        else:
+            contributor_value = self.contributor
+
+        if contributor_value is not None:
+            return self.anonymise_contributor(contributor_value)
+        return None
+
+    @anonymized_contributor.expression
+    def anonymized_contributor(cls):
+        """SQL expression for anonymized contributor."""
+        if not anonymise_contributors:
+            return cls.contributor
+
+        # Correct syntax for SQLAlchemy's case function
+        return case(
+            (func.lower(cls.contributor) == 'anonyme', cls.contributor),
+            else_='anonymisé'
+        ).label('anonymized_contributor')
+
     @staticmethod
     def anonymise_contributor(contributor):
         """Anonymize the contributor name."""
@@ -51,7 +79,6 @@ class Contribution(db.Model):
         if contributor == 'anonyme':
             return contributor
         return 'anonymisé'
-
 
     def __repr__(self):
         return f'<Contribution {self.id} by {self.contributor}>'

@@ -2,9 +2,9 @@ import re
 
 from flask import render_template, request, jsonify, redirect
 from markupsafe import Markup
-from sqlalchemy import or_, func
+from sqlalchemy import or_
 
-from app import app, db, anonymise_contributors
+from app import app, db
 from app.models import Contribution, Comment, SearchLog
 
 
@@ -70,16 +70,13 @@ def get_contributions_data(search_query='', page=1):
         keywords = search_query.split()
 
         for keyword in keywords:
-
             search_fields = [
                 Contribution.formatted_time.ilike(f'%{keyword}%'),
                 Contribution.body.ilike(f'%{keyword}%'),
                 # Convert ID to string for searching
-                Contribution.id.cast(db.String).ilike(f'%{keyword}%')
+                Contribution.id.cast(db.String).ilike(f'%{keyword}%'),
+                Contribution.anonymized_contributor.ilike(f'%{keyword}%')
             ]
-            # Search in all fields, but exclude contributor when anonymise_contributors is True
-            if not anonymise_contributors:
-                search_fields.insert(0, Contribution.contributor.ilike(f'%{keyword}%'))
 
             query = query.filter(or_(*search_fields))
 
@@ -94,8 +91,7 @@ def get_contributions_data(search_query='', page=1):
         for contrib in contribs:
             highlighted_contribs.append({
                 'id': highlight_keywords(contrib.id, keywords),
-                'contributor': contrib.contributor if anonymise_contributors else highlight_keywords(
-                    contrib.contributor, keywords),
+                'anonymized_contributor': highlight_keywords(contrib.anonymized_contributor, keywords),
                 'body': highlight_keywords(contrib.body, keywords),
                 'formatted_time': highlight_keywords(contrib.formatted_time, keywords)
             })
