@@ -375,16 +375,8 @@ button:focus:not(:active)::after {
     -webkit-box-orient: vertical;
     /*height: 10em;*/
     /*white-space: normal;*/
-}
-
-.truncate-body-highlighted {
-    display: -webkit-box;
-    /*-webkit-line-clamp: 3; !* This controls how many lines are shown *!*/
-    -webkit-box-orient: vertical;
-    /*height: 10em;*/
     overflow: hidden;
     text-overflow: ellipsis;
-    /*white-space: normal;*/
 }
 
 .expandable-cell {

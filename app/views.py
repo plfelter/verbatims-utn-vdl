@@ -1,9 +1,11 @@
-from flask import render_template, request, jsonify, redirect, url_for
-from markupsafe import Markup
-from app import app, db
-from app.models import Contribution, Comment, SearchLog
-from sqlalchemy import or_
 import re
+
+from flask import render_template, request, jsonify, redirect
+from markupsafe import Markup
+from sqlalchemy import or_, func
+
+from app import app, db, anonymise_contributors
+from app.models import Contribution, Comment, SearchLog
 
 
 def highlight_keywords(text, keywords):
@@ -33,7 +35,8 @@ def highlight_keywords(text, keywords):
         # Use regex for case-insensitive matching
         pattern = re.compile(re.escape(keyword), re.IGNORECASE)
         # Replace with the same text wrapped in a highlight span
-        highlighted_text = pattern.sub(lambda m: f'<span class="keyword-highlight">{m.group(0)}</span>', highlighted_text)
+        highlighted_text = pattern.sub(lambda m: f'<span class="keyword-highlight">{m.group(0)}</span>',
+                                       highlighted_text)
 
     return Markup(highlighted_text)
 
@@ -42,6 +45,7 @@ def highlight_keywords(text, keywords):
 def index():
     """Home page route."""
     return redirect('/contributions')
+
 
 def get_contributions_data(search_query='', page=1):
     """
@@ -58,23 +62,26 @@ def get_contributions_data(search_query='', page=1):
     per_page = 30
     offset = (page - 1) * per_page if page > 1 or not search_query else 0
 
+    # Create a query that searches for contributions containing all keywords
+    query = Contribution.query
+
     if search_query:
         # Split the search query into keywords
         keywords = search_query.split()
 
-        # Create a query that searches for contributions containing all keywords
-        query = Contribution.query
-
         for keyword in keywords:
-            # Search in all fields
-            query = query.filter(
-                or_(
-                    Contribution.contributor.ilike(f'%{keyword}%'),
-                    Contribution.body.ilike(f'%{keyword}%'),
-                    # Convert ID to string for searching
-                    Contribution.id.cast(db.String).ilike(f'%{keyword}%')
-                )
-            )
+
+            search_fields = [
+                Contribution.formatted_time.ilike(f'%{keyword}%'),
+                Contribution.body.ilike(f'%{keyword}%'),
+                # Convert ID to string for searching
+                Contribution.id.cast(db.String).ilike(f'%{keyword}%')
+            ]
+            # Search in all fields, but exclude contributor when anonymise_contributors is True
+            if not anonymise_contributors:
+                search_fields.insert(0, Contribution.contributor.ilike(f'%{keyword}%'))
+
+            query = query.filter(or_(*search_fields))
 
         # Get the total count of matching contributions
         total_count = query.count()
@@ -85,23 +92,21 @@ def get_contributions_data(search_query='', page=1):
         # Create highlighted versions of the contribution fields
         highlighted_contribs = []
         for contrib in contribs:
-            # Create a copy of the contribution with highlighted text
-            highlighted_contrib = {
+            highlighted_contribs.append({
                 'id': highlight_keywords(contrib.id, keywords),
-                'contributor': highlight_keywords(contrib.contributor, keywords),
+                'contributor': contrib.contributor if anonymise_contributors else highlight_keywords(
+                    contrib.contributor, keywords),
                 'body': highlight_keywords(contrib.body, keywords),
-                'time': contrib.time  # No need to highlight the time
-            }
-            highlighted_contribs.append((contrib, highlighted_contrib))
+                'formatted_time': highlight_keywords(contrib.formatted_time, keywords)
+            })
 
         # Check if there are more results
         has_more = len(contribs) == per_page and total_count > offset + per_page
     else:
         # If no search query, return all contributions without highlighting
-        total_count = Contribution.query.count()
-        contribs = Contribution.query.order_by(Contribution.id).offset(offset).limit(per_page).all()
-        highlighted_contribs = [(contrib, None) for contrib in contribs]
-        has_more = len(contribs) == per_page and total_count > offset + per_page
+        total_count = query.count()
+        highlighted_contribs = query.order_by(Contribution.id).offset(offset).limit(per_page).all()
+        has_more = len(highlighted_contribs) == per_page and total_count > offset + per_page
         keywords = []
 
     return highlighted_contribs, page, has_more, search_query, keywords if search_query else [], total_count
@@ -116,15 +121,16 @@ def contributions():
     page = request.args.get('page', 1, type=int)
     search_query = request.args.get('search', '')
 
-    highlighted_contribs, page, has_more, search_query, keywords, total_count = get_contributions_data(search_query, page)
+    highlighted_contribs, page, has_more, search_query, keywords, total_count = get_contributions_data(search_query,
+                                                                                                       page)
 
-    return render_template('contributions.html', 
-                          contributions=highlighted_contribs, 
-                          page=page,
-                          has_more=has_more,
-                          search_query=search_query,
-                          keywords=keywords,
-                          total_count=total_count)
+    return render_template('contributions.html',
+                           contributions=highlighted_contribs,
+                           page=page,
+                           has_more=has_more,
+                           search_query=search_query,
+                           keywords=keywords,
+                           total_count=total_count)
 
 
 @app.route('/get-contributions', methods=['GET', 'POST'])
@@ -158,15 +164,16 @@ def get_contributions():
             print(f"Error logging search query: {str(e)}")
             db.session.rollback()
 
-    highlighted_contribs, page, has_more, search_query, keywords, total_count = get_contributions_data(search_query, page)
+    highlighted_contribs, page, has_more, search_query, keywords, total_count = get_contributions_data(search_query,
+                                                                                                       page)
 
-    return render_template('contributions_content.html', 
-                          contributions=highlighted_contribs, 
-                          page=page,
-                          has_more=has_more,
-                          search_query=search_query,
-                          keywords=keywords,
-                          total_count=total_count)
+    return render_template('contributions_content.html',
+                           contributions=highlighted_contribs,
+                           page=page,
+                           has_more=has_more,
+                           search_query=search_query,
+                           keywords=keywords,
+                           total_count=total_count)
 
 
 @app.route('/discussion', methods=['GET', 'POST'])

@@ -1,9 +1,14 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
+import locale
 
 persistent_path: Path = Path(__file__).resolve().parent
 db_path = persistent_path / "sqlite.db"
+
+# App settings
+anonymise_contributors = True
+# locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
 app = Flask(__name__)
 

@@ -1,6 +1,10 @@
-from app import db
 from datetime import datetime
+
 import pytz
+from sqlalchemy import func
+from sqlalchemy.ext.hybrid import hybrid_property
+
+from app import db
 
 
 class SearchLog(db.Model):
@@ -15,6 +19,7 @@ class SearchLog(db.Model):
     def __repr__(self):
         return f'<SearchLog {self.id} from {self.ip_address}>'
 
+from app import anonymise_contributors
 
 class Contribution(db.Model):
     """Contribution model for storing verbatim data."""
@@ -24,6 +29,29 @@ class Contribution(db.Model):
     contributor = db.Column(db.String(80), nullable=False)
     body = db.Column(db.Text, nullable=False)
     time = db.Column(db.DateTime, nullable=False)
+
+    @hybrid_property
+    def formatted_time(self):
+        """Return time formatted in French style."""
+        format_str = 'Le %d/%m/%Y à %Hh%M'
+        # We need to ensure we have the actual datetime instance
+        if hasattr(self, '_time') and self._time is not None:
+            return self._time.strftime(format_str)
+        if self.time is not None:
+            # Access the actual datetime value, not the SQLAlchemy column
+            time_value = self.time
+            if hasattr(time_value, 'strftime'):  # Make sure it's a datetime object
+                return time_value.strftime(format_str)
+        return func.strftime(format_str, self.time).label('formatted_time')
+
+    @staticmethod
+    def anonymise_contributor(contributor):
+        """Anonymize the contributor name."""
+        contributor = contributor.lower()
+        if contributor == 'anonyme':
+            return contributor
+        return 'anonymisé'
+
 
     def __repr__(self):
         return f'<Contribution {self.id} by {self.contributor}>'
