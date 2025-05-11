@@ -1,6 +1,6 @@
 <!-- Out-of-band swap for search count -->
 <div id="search-count" class="search-count" hx-swap-oob="true">
-    {{ total_count }} contribution{% if total_count != 1 %}s{% endif %} found
+    {{ total_count }} contribution{% if total_count != 1 %}s{% endif %} trouvée{% if total_count != 1 %}s{% endif %}
 </div>
 
 {% for c, highlighted in contributions %}

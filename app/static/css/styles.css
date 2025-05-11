@@ -476,6 +476,11 @@ button:focus:not(:active)::after {
     box-shadow: var(--shadow-md);
 }
 
+.search-count {
+    font-size: .75rem;
+    color: #888;
+}
+
 /* ===== HTMX INDICATORS ===== */
 .htmx-indicator {
     display: none;
