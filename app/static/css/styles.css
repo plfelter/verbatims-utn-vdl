@@ -194,6 +194,7 @@ form:focus-within {
 
 input[type="text"],
 input[type="email"],
+input[type="search"],
 textarea {
     width: 100%;
     padding: 10px;
@@ -363,7 +364,7 @@ button:focus:not(:active)::after {
 
 .contribution-cell {
     position: relative;
-    padding: 15px;
+    padding-bottom: 15px;
     background-color: white;
     border: 1px solid var(--dark-gray);
     border-radius: var(--border-radius);
@@ -424,6 +425,7 @@ button:focus:not(:active)::after {
 }
 
 .cell-content {
+    padding: 15px;
     position: relative;
     transition: var(--transition-normal);
 }
@@ -434,8 +436,8 @@ button:focus:not(:active)::after {
 
 .cell-full {
     display: none;
-    white-space: pre-wrap;
-    word-break: break-word;
+    /*white-space: pre-wrap;*/
+    /*word-break: break-word;*/
 }
 
 .cell-content.expanded .cell-preview {
@@ -449,8 +451,8 @@ button:focus:not(:active)::after {
 
 .toggle-expand {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    bottom: 5px;
+    right: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -459,8 +461,8 @@ button:focus:not(:active)::after {
     padding: 0;
     font-size: 16px;
     line-height: 1;
-    color: white;
-    background-color: var(--primary-color);
+    color: var(--primary-color);
+    background-color: white;
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -468,7 +470,9 @@ button:focus:not(:active)::after {
 }
 
 .toggle-expand:hover {
-    background-color: var(--secondary-color);
+    color: white;
+    background-color: var(--primary-color);
+    /*background-color: white;*/
     transform: scale(1.1);
 }
 

@@ -1,20 +1,32 @@
 {% for c, highlighted in contributions %}
 <div class="contribution-cell">
     <div class="cell-content">
+
         <div class="cell-preview">
-            <div class="contribution-id">Contribution n&#186; {% if highlighted %}{{ highlighted.id }}{% else %}{{ c.id }}{% endif %}</div>
-            <div class="contribution-author">Auteur {% if highlighted %}<span class="truncate-text truncate-contributor-highlighted">{{ highlighted.contributor }}</span>{% else %}<span class="truncate-text truncate-contributor">{{ c.contributor }}</span>{% endif %}</div>
-            <div class="contribution-body">{% if highlighted %}<span class="truncate-body-highlighted">{{ highlighted.body }}</span>{% else %}<span class="truncate-body">{{ c.body }}</span>{% endif %}</div>
-            <div class="contribution-date">{{ c.time.strftime('Le %d/%m/%Y à %Hh%M') }}</div>
+            <div class="contribution-id">Contribution n&#186; {% if highlighted %}{{ highlighted.id }}{% else %}{{ c.id
+                }}{% endif %}<span class="contribution-date">{{ c.time.strftime(' - Le %d/%m/%Y à %Hh%M') }}</span>
+            </div>
+            <div class="contribution-body">{% if highlighted %}<span class="truncate-body-highlighted">{{ highlighted.body }}</span>{%
+                else %}<span class="truncate-body">{{ c.body }}</span>{% endif %}
+            </div>
+            <div class="contribution-author">Auteur {% if highlighted %}<span
+                    class="truncate-text truncate-contributor-highlighted">{{ highlighted.contributor }}</span>{% else
+                %}<span class="truncate-text truncate-contributor">{{ c.contributor }}</span>{% endif %}
+            </div>
         </div>
+
         <div class="cell-full">
-            <div class="contribution-id">Contribution n&#186; {% if highlighted %}{{ highlighted.id }}{% else %}{{ c.id }}{% endif %}</div>
+            <div class="contribution-id">Contribution n&#186; {% if highlighted %}{{ highlighted.id }}{% else %}{{ c.id
+                }}{% endif %}
+                <span class="contribution-date">{{ c.time.strftime(' - Le %d/%m/%Y à %Hh%M') }}</span>
+            </div>
             <div class="contribution-author">Auteur {% if highlighted %}{{ highlighted.contributor }}{% else %}{{ c.contributor }}{% endif %}</div>
-            <div class="contribution-body">{% if highlighted %}{{ highlighted.body }}{% else %}{{ c.body }}{% endif %}</div>
-            <div class="contribution-date">{{ c.time.strftime('Le %d/%m/%Y à %Hh%M') }}</div>
+            <div class="contribution-body">{% if highlighted %}{{ highlighted.body }}{% else %}{{ c.body }}{% endif %}
+            </div>
         </div>
-        <button class="toggle-expand" onclick="toggleExpand(this)">+</button>
+
     </div>
+    <button class="toggle-expand" onclick="toggleExpand(this)">&#8595;</button>
 </div>
 {% endfor %}
 
@@ -35,15 +47,15 @@
 
 <script>
     function toggleExpand(button) {
-        const cellContent = button.parentElement;
+        const cellContent = button.parentElement.querySelector('.cell-content');
         const isExpanded = cellContent.classList.contains('expanded');
 
         if (isExpanded) {
             cellContent.classList.remove('expanded');
-            button.textContent = '+';
+            button.innerHTML = '&#8595;';
         } else {
             cellContent.classList.add('expanded');
-            button.textContent = '-';
+            button.innerHTML = '&#8593;';
         }
     }
 </script>
