@@ -53,7 +53,7 @@ def get_contributions_data(search_query='', page=1):
         page (int): The page number for pagination
 
     Returns:
-        tuple: (highlighted_contribs, page, has_more, search_query, keywords)
+        tuple: (highlighted_contribs, page, has_more, search_query, keywords, total_count)
     """
     per_page = 30
     offset = (page - 1) * per_page if page > 1 or not search_query else 0
@@ -76,6 +76,9 @@ def get_contributions_data(search_query='', page=1):
                 )
             )
 
+        # Get the total count of matching contributions
+        total_count = query.count()
+
         # Get results with pagination
         contribs = query.order_by(Contribution.id).offset(offset).limit(per_page).all()
 
@@ -92,15 +95,16 @@ def get_contributions_data(search_query='', page=1):
             highlighted_contribs.append((contrib, highlighted_contrib))
 
         # Check if there are more results
-        has_more = len(contribs) == per_page and query.count() > offset + per_page
+        has_more = len(contribs) == per_page and total_count > offset + per_page
     else:
         # If no search query, return all contributions without highlighting
+        total_count = Contribution.query.count()
         contribs = Contribution.query.order_by(Contribution.id).offset(offset).limit(per_page).all()
         highlighted_contribs = [(contrib, None) for contrib in contribs]
-        has_more = len(contribs) == per_page and Contribution.query.count() > offset + per_page
+        has_more = len(contribs) == per_page and total_count > offset + per_page
         keywords = []
 
-    return highlighted_contribs, page, has_more, search_query, keywords if search_query else []
+    return highlighted_contribs, page, has_more, search_query, keywords if search_query else [], total_count
 
 
 @app.route('/contributions', methods=['GET'])
@@ -112,14 +116,15 @@ def contributions():
     page = request.args.get('page', 1, type=int)
     search_query = request.args.get('search', '')
 
-    highlighted_contribs, page, has_more, search_query, keywords = get_contributions_data(search_query, page)
+    highlighted_contribs, page, has_more, search_query, keywords, total_count = get_contributions_data(search_query, page)
 
     return render_template('contributions.html', 
                           contributions=highlighted_contribs, 
                           page=page,
                           has_more=has_more,
                           search_query=search_query,
-                          keywords=keywords)
+                          keywords=keywords,
+                          total_count=total_count)
 
 
 @app.route('/get-contributions', methods=['GET', 'POST'])
@@ -133,14 +138,15 @@ def get_contributions():
     search_query = request.form.get('search', request.args.get('search', ''))
     page = request.args.get('page', 1, type=int)
 
-    highlighted_contribs, page, has_more, search_query, keywords = get_contributions_data(search_query, page)
+    highlighted_contribs, page, has_more, search_query, keywords, total_count = get_contributions_data(search_query, page)
 
     return render_template('contributions_content.html', 
                           contributions=highlighted_contribs, 
                           page=page,
                           has_more=has_more,
                           search_query=search_query,
-                          keywords=keywords)
+                          keywords=keywords,
+                          total_count=total_count)
 
 
 @app.route('/discussion', methods=['GET', 'POST'])

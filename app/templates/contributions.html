@@ -19,12 +19,22 @@
                hx-swap="innerHTML"
                hx-indicator=".htmx-indicator">
         <div class="htmx-indicator">
-                    <img src="{{ url_for('static', filename='img/loading.svg') }}" alt="Loading..."/> Searching...
-                </div>
+            <img src="{{ url_for('static', filename='img/loading.svg') }}" alt="Loading..."/> Searching...
+        </div>
+        <div id="search-count" class="search-count">
+            {% if total_count is defined %}
+            {{ total_count }} contribution{% if total_count != 1 %}s{% endif %} found
+            {% endif %}
+        </div>
     </div>
 
-    <div class="contributions-grid">
-        {% include 'contributions_content.html' with context %}
+    <div class="contributions-grid"
+         hx-get="{{ url_for('get_contributions') }}"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+        <!-- Content will be loaded via HTMX -->
+        <div class="loading">Loading contributions...</div>
     </div>
+
 </div>
 {% endblock %}
