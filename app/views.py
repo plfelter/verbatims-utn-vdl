@@ -1,7 +1,7 @@
 from flask import render_template, request, jsonify, redirect, url_for
 from markupsafe import Markup
 from app import app, db
-from app.models import Contribution, Comment
+from app.models import Contribution, Comment, SearchLog
 from sqlalchemy import or_
 import re
 
@@ -137,6 +137,26 @@ def get_contributions():
     # Get search query from appropriate source based on request type
     search_query = request.form.get('search', request.args.get('search', ''))
     page = request.args.get('page', 1, type=int)
+
+    # Log search queries when using POST method with a search query
+    if request.method == 'POST' and search_query:
+        # Get the requester's IP address
+        ip_address = request.remote_addr
+
+        # Create a new search log entry
+        search_log = SearchLog(
+            search_content=search_query,
+            ip_address=ip_address
+        )
+
+        # Save the log to the database
+        try:
+            db.session.add(search_log)
+            db.session.commit()
+        except Exception as e:
+            # Log the error but continue with the request
+            print(f"Error logging search query: {str(e)}")
+            db.session.rollback()
 
     highlighted_contribs, page, has_more, search_query, keywords, total_count = get_contributions_data(search_query, page)
 
