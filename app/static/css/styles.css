@@ -146,36 +146,6 @@ nav a:hover::after {
     transform-origin: bottom left;
 }
 
-/* ===== TABLES ===== */
-table {
-    width: 100%;
-    margin-bottom: 20px;
-    border-collapse: collapse;
-    box-shadow: var(--shadow-md);
-}
-
-table, th, td {
-    border: 1px solid var(--dark-gray);
-}
-
-th, td {
-    padding: 12px;
-    text-align: left;
-}
-
-th {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-tr:nth-child(even) {
-    background-color: var(--light-gray);
-}
-
-tr:hover {
-    background-color: var(--medium-gray);
-}
-
 /* ===== FORMS ===== */
 form {
     margin-bottom: 20px;
@@ -366,7 +336,7 @@ button:focus:not(:active)::after {
 
 .contribution-cell {
     position: relative;
-    padding-bottom: 15px;
+    padding-bottom: 2em;
     background-color: white;
     border: 1px solid var(--dark-gray);
     border-radius: var(--border-radius);
@@ -383,44 +353,36 @@ button:focus:not(:active)::after {
 .contribution-id, 
 .contribution-author, 
 .contribution-date {
-    margin-bottom: 8px;
+    margin-bottom: 0px;
+    font-weight: 500;
+    font-size: .75rem;
+    color: #888;
 }
 
 .contribution-body {
-    margin-bottom: 15px;
+    /*margin-bottom: 15px;*/
+    margin-top: 10px;
+    font-size: .9375rem;
+    white-space: pre-wrap;
 }
 
 /* Text truncation classes */
-.truncate-text {
-    white-space: nowrap;
-    /*overflow: hidden;*/
-    text-overflow: ellipsis;
-    max-width: 100%;
-    display: inline-block;
-}
-
-.truncate-contributor {
-    max-width: 20ch;
-}
-
-.truncate-contributor-highlighted {
-    max-width: 50ch;
-}
-
 .truncate-body {
-    max-width: 50ch;
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: -webkit-box;
+    /*-webkit-line-clamp: 3; !* This controls how many lines are shown *!*/
+    -webkit-box-orient: vertical;
+    /*height: 10em;*/
+    /*white-space: normal;*/
 }
 
 .truncate-body-highlighted {
-    max-width: 100ch;
-    display: block;
-    white-space: nowrap;
+    display: -webkit-box;
+    /*-webkit-line-clamp: 3; !* This controls how many lines are shown *!*/
+    -webkit-box-orient: vertical;
+    /*height: 10em;*/
     overflow: hidden;
     text-overflow: ellipsis;
+    /*white-space: normal;*/
 }
 
 .expandable-cell {
@@ -431,18 +393,20 @@ button:focus:not(:active)::after {
     padding: 15px;
     position: relative;
     transition: var(--transition-normal);
-    height: auto;
+    height: fit-content;
     overflow: hidden;
 }
 
 .cell-preview {
     display: block;
-    height: auto;
+    height: 10em;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .cell-full {
     display: none;
-    height: auto;
+    height: fit-content;
     /*white-space: pre-wrap;*/
     /*word-break: break-word;*/
 }

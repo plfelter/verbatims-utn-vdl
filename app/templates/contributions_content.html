@@ -6,12 +6,11 @@
             <div class="contribution-id">Contribution n&#186; {% if highlighted %}{{ highlighted.id }}{% else %}{{ c.id
                 }}{% endif %}<span class="contribution-date">{{ c.time.strftime(' - Le %d/%m/%Y à %Hh%M') }}</span>
             </div>
+            <div class="contribution-author">Auteur {% if highlighted %}{{ highlighted.contributor }}{% else
+                %}{{ c.contributor }}{% endif %}
+            </div>
             <div class="contribution-body">{% if highlighted %}<span class="truncate-body-highlighted">{{ highlighted.body }}</span>{%
                 else %}<span class="truncate-body">{{ c.body }}</span>{% endif %}
-            </div>
-            <div class="contribution-author">Auteur {% if highlighted %}<span
-                    class="truncate-text truncate-contributor-highlighted">{{ highlighted.contributor }}</span>{% else
-                %}<span class="truncate-text truncate-contributor">{{ c.contributor }}</span>{% endif %}
             </div>
         </div>
 
