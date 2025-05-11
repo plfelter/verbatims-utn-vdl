@@ -343,10 +343,12 @@ button:focus:not(:active)::after {
     box-shadow: var(--shadow-md);
     transition: var(--transition-normal);
     height: fit-content;
+    cursor: pointer;
 }
 
 .contribution-cell:hover {
     transform: translateY(-5px);
+    /*background-color: rgba(100, 100, 100, 0.01);*/
     box-shadow: var(--shadow-lg);
 }
 
@@ -407,6 +409,7 @@ button:focus:not(:active)::after {
 .cell-full {
     display: none;
     height: fit-content;
+    min-height: 10em;
     /*white-space: pre-wrap;*/
     /*word-break: break-word;*/
 }
@@ -417,7 +420,7 @@ button:focus:not(:active)::after {
 
 .cell-content.expanded .cell-full {
     display: block;
-    animation: fadeIn 0.3s ease-out;
+    /*animation: fadeIn 0.3s ease-out;*/
     height: auto;
 }
 

@@ -4,7 +4,7 @@
 </div>
 
 {% for c, highlighted in contributions %}
-<div class="contribution-cell">
+<div class="contribution-cell" onclick="triggerExpand(this)">
     <div class="cell-content">
 
         <div class="cell-preview">
@@ -24,7 +24,9 @@
                 }}{% endif %}
                 <span class="contribution-date">{{ c.time.strftime(' - Le %d/%m/%Y à %Hh%M') }}</span>
             </div>
-            <div class="contribution-author">Auteur {% if highlighted %}{{ highlighted.contributor }}{% else %}{{ c.contributor }}{% endif %}</div>
+            <div class="contribution-author">Auteur {% if highlighted %}{{ highlighted.contributor }}{% else %}{{
+                c.contributor }}{% endif %}
+            </div>
             <div class="contribution-body">{% if highlighted %}{{ highlighted.body }}{% else %}{{ c.body }}{% endif %}
             </div>
         </div>
@@ -50,6 +52,12 @@
 
 
 <script>
+    function triggerExpand(cell) {
+        // Find the button inside this cell and trigger its click event
+        const button = cell.querySelector('.toggle-expand');
+        toggleExpand(button);
+    }
+
     function toggleExpand(button) {
         const cellContent = button.parentElement.querySelector('.cell-content');
         const isExpanded = cellContent.classList.contains('expanded');
