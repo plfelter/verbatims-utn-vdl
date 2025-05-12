@@ -3,21 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}VDL UTNS Verbatims{% endblock %}</title>
+    <title>{% block title %}Verbatims UTNS VDL{% endblock %}</title>
     <!-- HTMX for interactive UI -->
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Font Awesome for burger menu icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
+{% macro nav_links() %}
+    <a href="{{ url_for('contributions') }}">Contributions</a>
+    <a href="{{ url_for('discussion') }}">Discussion</a>
+    <a href="{{ url_for('download') }}">Download</a>
+    <a href="{{ url_for('a_propos') }}">A propos</a>
+{#    <a href="{{ url_for('analyse') }}">Analyse</a>#}
+{% endmacro %}
 <body>
     <div class="container">
         <nav>
-            <a href="{{ url_for('contributions') }}">Contributions</a>
-            <a href="{{ url_for('discussion') }}">Discussion</a>
-            <a href="{{ url_for('download') }}">Download</a>
-            <a href="{{ url_for('a_propos') }}">A propos</a>
-{#            <a href="{{ url_for('analyse') }}">Analyse</a>#}
+            <div class="nav-content">
+                <div class="site-name">Verbatims UTNS Villard-de-Lans</div>
+                <div class="nav-links">
+                    {{ nav_links() }}
+                </div>
+                <div class="burger-menu">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
         </nav>
+
+        <!-- Sidebar for mobile view -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="site-name">Verbatims UTNS VDL</div>
+                <div class="close-sidebar">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            <div class="sidebar-links">
+                {{ nav_links() }}
+            </div>
+        </div>
+
+        <!-- Overlay for sidebar -->
+        <div class="sidebar-overlay"></div>
+
         {% block content %}{% endblock %}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const burgerMenu = document.querySelector('.burger-menu');
+            const sidebar = document.querySelector('.sidebar');
+            const closeSidebar = document.querySelector('.close-sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+
+            // Toggle sidebar when burger menu is clicked
+            burgerMenu.addEventListener('click', function() {
+                sidebar.classList.add('active');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling when sidebar is open
+            });
+
+            // Close sidebar when X is clicked
+            closeSidebar.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scrolling
+            });
+
+            // Close sidebar when overlay is clicked
+            overlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scrolling
+            });
+        });
+    </script>
 </body>
 </html>
