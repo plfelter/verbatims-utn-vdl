@@ -1,7 +1,10 @@
+import os
 import re
+import json
 
 from flask import render_template, request, jsonify, redirect
 from markupsafe import Markup
+from mistralai import Mistral
 from sqlalchemy import or_
 
 from app import app, db
@@ -187,7 +190,7 @@ def discussion():
                                               Comment.created_at.desc()).all()
             is_htmx = request.headers.get('HX-Request') == 'true'
             return render_template('discussion.html', comments=comments,
-                                       error="Username and comment are required", is_htmx=is_htmx)
+                                   error="Username and comment are required", is_htmx=is_htmx)
 
         new_comment = Comment(username=username, email=email, body=body, ip_address=ip_address)
 
@@ -206,7 +209,7 @@ def discussion():
                                               Comment.created_at.desc()).all()
             is_htmx = request.headers.get('HX-Request') == 'true'
             return render_template('discussion.html', comments=comments,
-                                       error=str(e), is_htmx=is_htmx)
+                                   error=str(e), is_htmx=is_htmx)
 
     # Get all comments ordered by vote score (highest first), then by creation date (newest first)
     # We use a hybrid approach with a subquery to order by the calculated vote_score
@@ -287,7 +290,28 @@ def add_answer(comment_id):
     # Return the updated comment HTML
     return render_template('comment_partial.html', comment=comment)
 
-# You can add more routes as needed for your application
+
+def get_mistral_answer(chat_messages: list[dict], prompt: str):
+    """
+    Helper function to fetch Mistral answer data.
+    """
+    # api_key = os.environ["MISTRAL_API_KEY"]
+    api_key = ""
+    model = "mistral-large-latest"
+
+    client = Mistral(api_key=api_key)
+
+    messages = []
+    for cm in chat_messages:
+        messages.append({"role": "user", "content": cm["user"]})
+        messages.append({"role": "assistant", "content": cm["server"]})
+    messages.append({"role": "user", "content": prompt})
+
+    chat_response = client.chat.complete(
+        model=model,
+        messages=messages
+    )
+    return chat_response
 
 
 @app.route('/analyse', methods=['GET', 'POST'])
@@ -304,16 +328,14 @@ def analyse():
         if not prompt:
             return "Error: Prompt cannot be empty", 400
 
-        # Get the previous messages from the form (if any)
-        previous_messages = request.form.get('previous_messages', '')
-
         # Get the requester's IP address
         ip_address = request.remote_addr
 
+        # Get the previous messages from the form (if any)
+        previous_messages = json.loads(request.form.get('previous_messages', ''))
+
         # Create the server response
-        # Here you could use the previous_messages to inform the response
-        # For example, by passing them to an AI model or using them for context
-        server_response = f"You typed in:{prompt}"
+        server_response = get_mistral_answer(previous_messages, prompt)
 
         # Log the chat in the database using the new AnalyseChat model
         chat_log = AnalyseChat(
@@ -330,9 +352,9 @@ def analyse():
             return f"Error logging chat: {str(e)}", 500
 
         # Return the message exchange HTML
-        return render_template('analyse_message.html', 
-                              user_message=prompt, 
-                              server_message=server_response)
+        return render_template('analyse_message.html',
+                               user_message=prompt,
+                               server_message=server_response)
 
     # For GET requests, render the initial template
     return render_template('analyse.html')

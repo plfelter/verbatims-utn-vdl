@@ -17,10 +17,9 @@ backlog = 2048
 # Logging
 errorlog = "/var/log/gunicorn/error.log"
 accesslog = "/var/log/gunicorn/access.log"
-loglevel = "info" # Capture stdout/stderr from workers
+loglevel = "info"
 logger_class = "gunicorn.glogging.Logger"
-access_log_format = '%({X-Forwarded-For}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(L)s'
-capture_output = True
+capture_output = True # Capture stdout/stderr from workers
 
 # Security
 limit_request_line = 4094  # Limit the allowed size of an HTTP request line
