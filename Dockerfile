@@ -36,5 +36,5 @@ EXPOSE 5001
 
 # Command to run the application using wsgi.py
 #CMD ["gunicorn", "--bind", "0.0.0.0:5001", "wsgi:app"]
+CMD ["poetry", "run", "gunicorn", "--config", "gunicorn.conf.py", "wsgi:application"]
 
-CMD ["poetry", "run", "python", "wsgi.py"]
