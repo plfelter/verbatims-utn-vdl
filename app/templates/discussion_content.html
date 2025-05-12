@@ -9,11 +9,11 @@
         {% endif %}
         <form hx-post="/discussion" hx-target="#discussion-container" hx-swap="outerHTML">
             <div>
-                <label for="username">Your Name:</label>
+                <label for="username">Your Name:</label><br>
                 <input type="text" id="username" name="username" required>
             </div>
             <div>
-                <label for="body">Comment:</label>
+                <label for="body">Comment:</label><br>
                 <textarea id="body" name="body" rows="4" required></textarea>
             </div>
             <button type="submit">Post Comment</button>

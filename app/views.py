@@ -183,12 +183,9 @@ def discussion():
         if not username or not body:
             comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(),
                                               Comment.created_at.desc()).all()
-            if request.headers.get('HX-Request'):
-                return render_template('discussion_content.html', comments=comments,
-                                       error="Username and comment are required")
-            else:
-                return render_template('discussion.html', comments=comments,
-                                       error="Username and comment are required")
+            is_htmx = request.headers.get('HX-Request') == 'true'
+            return render_template('discussion.html', comments=comments,
+                                       error="Username and comment are required", is_htmx=is_htmx)
 
         new_comment = Comment(username=username, body=body)
 
@@ -199,32 +196,26 @@ def discussion():
             # After successful comment creation, return the updated page
             comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(),
                                               Comment.created_at.desc()).all()
-            if request.headers.get('HX-Request'):
-                return render_template('discussion_content.html', comments=comments)
-            else:
-                return render_template('discussion.html', comments=comments)
+            is_htmx = request.headers.get('HX-Request') == 'true'
+            return render_template('discussion.html', comments=comments, is_htmx=is_htmx)
         except Exception as e:
             db.session.rollback()
             comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(),
                                               Comment.created_at.desc()).all()
-            if request.headers.get('HX-Request'):
-                return render_template('discussion_content.html', comments=comments,
-                                       error=str(e))
-            else:
-                return render_template('discussion.html', comments=comments,
-                                       error=str(e))
+            is_htmx = request.headers.get('HX-Request') == 'true'
+            return render_template('discussion.html', comments=comments,
+                                       error=str(e), is_htmx=is_htmx)
 
     # Get all comments ordered by vote score (highest first), then by creation date (newest first)
     # We use a hybrid approach with a subquery to order by the calculated vote_score
     comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(), Comment.created_at.desc()).all()
 
     # Check if the request wants HTML or JSON
-    if request.headers.get('HX-Request'):
-        # For HTMX requests, return only the discussion container content
-        return render_template('discussion_content.html', comments=comments)
-    elif request.args.get('format') != 'json':
-        # For regular HTML requests, return the full template
-        return render_template('discussion.html', comments=comments)
+    if request.args.get('format') != 'json':
+        # For HTML requests, check if it's an HTMX request
+        is_htmx = request.headers.get('HX-Request') == 'true'
+        # Return the template with the is_htmx flag
+        return render_template('discussion.html', comments=comments, is_htmx=is_htmx)
     else:
         # Return JSON for API clients
         result = [{"id": comment.id, "username": comment.username, "body": comment.body,
