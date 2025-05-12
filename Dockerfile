@@ -27,7 +27,7 @@ COPY pyproject.toml poetry.lock* ./
 # Install dependencies
 RUN poetry install --no-interaction --no-ansi --without dev --no-root
 
-# Copy the rest of the application and the server database (when it exists)
+# Copy the rest of the application and the local database (when it exists)
 COPY . .
 
 
