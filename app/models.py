@@ -137,4 +137,17 @@ class AnalyseChat(db.Model):
     def __repr__(self):
         return f'<AnalyseChat {self.id} from {self.ip_address}>'
 
+
+class DownloadLog(db.Model):
+    """Model for logging file downloads."""
+    __tablename__ = 'download_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
+    file_type = db.Column(db.String(10), nullable=False)  # 'csv' or 'json'
+    ip_address = db.Column(db.String(45), nullable=False)  # IPv6 can be up to 45 chars
+
+    def __repr__(self):
+        return f'<DownloadLog {self.id} - {self.file_type} from {self.ip_address}>'
+
 # You can add more models as needed for your application

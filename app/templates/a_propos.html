@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}A propos{% endblock %}
+
+{% block content %}
+    <div class="a-propos-container">
+        <h1>A propos</h1>
+
+        <section class="about-section">
+            <h2>À propos des contributions</h2>
+            <p>Le dossier relatif à la demande de création d'une UTNS (Unité Touristique Nouvelle Structurante) sur le
+                secteur de Côte 2000 à Villard-de-Lans, présenté par la Communauté de communes du Massif du Vercors
+                (CCMV), a été soumis à participation du public par voie électronique (PPVE). Celle-ci s'est déroulée du
+                lundi 31 mars 2025 à 9h00 au mercredi 30 avril 2025</p>
+
+            <p>https://www.registre-dematerialise.fr/6058/</p>
+
+            <p>L'objectif de ce site web est de permettre au public ainsi qu'aux contributeurs de prendre connaissance
+                de l'ensemble des contributions déposées dans le cadre la PPVE.</p>
+
+
+        </section>
+
+        <section class="about-section">
+            <h2>Auteur du site</h2>
+            <p>Pierre-Loïc Felter<br>114 rue du général Bourbaki<br>31200 Toulouse<br><br>contact@webpil.me</p>
+        </section>
+
+        <section class="about-section">
+            <h2>Hébergement</h2>
+            <p>Ce site est hébergé par OVH SAS 2 rue Kellermann - 59100 Roubaix - France</p>
+
+            <p>OVH SAS est une filiale de la société OVH Groupe SA, société immatriculée au RCS de Lille sous le numéro
+                537 407 926 sise 2, rue Kellermann, 59100 Roubaix.</p>
+        </section>
+    </div>
+
+    <style>
+        .a-propos-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .about-section {
+            margin-bottom: 40px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .about-section h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .about-section p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+    </style>
+{% endblock %}

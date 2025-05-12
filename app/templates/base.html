@@ -13,7 +13,9 @@
         <nav>
             <a href="{{ url_for('contributions') }}">Contributions</a>
             <a href="{{ url_for('discussion') }}">Discussion</a>
-            <a href="{{ url_for('analyse') }}">Analyse</a>
+            <a href="{{ url_for('download') }}">Download</a>
+            <a href="{{ url_for('a_propos') }}">A propos</a>
+{#            <a href="{{ url_for('analyse') }}">Analyse</a>#}
         </nav>
         {% block content %}{% endblock %}
     </div>

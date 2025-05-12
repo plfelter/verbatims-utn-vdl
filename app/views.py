@@ -1,14 +1,14 @@
-import os
-import re
 import json
+import re
+import os
 
-from flask import render_template, request, jsonify, redirect
+from flask import render_template, request, jsonify, redirect, send_from_directory
 from markupsafe import Markup
 from mistralai import Mistral
 from sqlalchemy import or_
 
 from app import app, db
-from app.models import Contribution, Comment, Answer, SearchLog, AnalyseChat
+from app.models import Contribution, Comment, Answer, SearchLog, AnalyseChat, DownloadLog
 
 
 def highlight_keywords(text, keywords):
@@ -310,8 +310,64 @@ def get_mistral_answer(chat_messages: list[dict], prompt: str):
     chat_response = client.chat.complete(
         model=model,
         messages=messages
-    )
+    ).choices[0].message.content
     return chat_response
+
+
+@app.route('/download')
+def download():
+    """
+    Download page with buttons to download anonymized contributions in CSV and JSON formats.
+    """
+    return render_template('download.html')
+
+
+@app.route('/download-file/<file_type>')
+def download_file(file_type):
+    """
+    Route to download the anonymized contributions file in the specified format.
+
+    Args:
+        file_type (str): The file type to download ('csv' or 'json')
+
+    Returns:
+        Response: The file download response
+    """
+    if file_type not in ['csv', 'json']:
+        return "Invalid file type", 400
+
+    # Get the requester's IP address
+    ip_address = request.remote_addr
+
+    # Log the download in the database
+    download_log = DownloadLog(
+        file_type=file_type,
+        ip_address=ip_address
+    )
+
+    # Save the log to the database
+    try:
+        db.session.add(download_log)
+        db.session.commit()
+    except Exception as e:
+        # Log the error but continue with the request
+        print(f"Error logging download: {str(e)}")
+        db.session.rollback()
+
+    # Get the project root directory
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    verbatims_dir = os.path.join(root_dir, 'verbatims')
+
+    # Define the file name based on the requested type
+    file_name = f"contributions-anonymisees.{file_type}"
+
+    # Send the file to the client
+    return send_from_directory(
+        verbatims_dir,
+        file_name,
+        as_attachment=True,
+        download_name=file_name
+    )
 
 
 @app.route('/analyse', methods=['GET', 'POST'])
@@ -358,3 +414,11 @@ def analyse():
 
     # For GET requests, render the initial template
     return render_template('analyse.html')
+
+
+@app.route('/a-propos')
+def a_propos():
+    """
+    A propos page with information about the author and the project.
+    """
+    return render_template('a_propos.html')
