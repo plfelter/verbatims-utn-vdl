@@ -24,7 +24,7 @@
         </div>
 
     </div>
-    <button class="toggle-expand" onclick="toggleExpand(this)">&#8595;</button>
+    <button class="toggle-expand" onclick="toggleExpand(event, this)">&#8595;</button>
 </div>
 {% endfor %}
 
@@ -47,13 +47,12 @@
     function triggerExpand(cell) {
         // Find the button inside this cell and trigger its click event
         const button = cell.querySelector('.toggle-expand');
-        toggleExpand(button);
+        toggleExpand(null, button);
     }
 
-    function toggleExpand(button) {
+    function toggleExpand(event, button) {
         const cellContent = button.parentElement.querySelector('.cell-content');
         const isExpanded = cellContent.classList.contains('expanded');
-
         if (isExpanded) {
             cellContent.classList.remove('expanded');
             button.innerHTML = '&#8595;';
@@ -61,5 +60,10 @@
             cellContent.classList.add('expanded');
             button.innerHTML = '&#8593;';
         }
+        // Stop propagation if event exists
+        if (event) {
+            event.stopPropagation();
+        }
+
     }
 </script>
