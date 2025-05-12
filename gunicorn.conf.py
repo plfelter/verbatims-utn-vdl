@@ -15,8 +15,12 @@ keepalive = 5  # How long to wait for requests on a keep-alive connection
 backlog = 2048
 
 # Logging
-errorlog = "/var/log/gunicorn/error.log"
-accesslog = "/var/log/gunicorn/access.log"
+import os
+log_dir = "./log/gunicorn"
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+accesslog = os.path.join(log_dir, "access.log")
+errorlog = os.path.join(log_dir, "error.log")
 loglevel = "info"
 logger_class = "gunicorn.glogging.Logger"
 capture_output = True # Capture stdout/stderr from workers
@@ -28,4 +32,4 @@ limit_request_field_size = 8190  # Limit the allowed size of an HTTP header
 
 # Graceful handling
 graceful_timeout = 30  # How long to wait for workers to finish their work during shutdown
-preload_app = True  # Load application code before worker processes are forked
+# preload_app = True  # Load application code before worker processes are forked
