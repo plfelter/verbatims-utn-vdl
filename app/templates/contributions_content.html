@@ -8,19 +8,18 @@
     <div class="cell-content">
 
         <div class="cell-preview">
-            <div class="contribution-id">Contribution n&#186; {{ c.id }}<span
-                    class="contribution-date"> - {{ c.formatted_time }}</span>
+            <div class="contribution-id">Contribution n&#186; {{ c.id }}
+                <span class="contribution-author"> - {{ c.anonymized_contributor }}</span>
             </div>
-            <div class="contribution-author">Auteur {{ c.anonymized_contributor }}</div>
+            <div class="contribution-date">{{ c.formatted_time }}</div>
             <div class="contribution-body"><span class="truncate-body">{{ c.body }}</span></div>
         </div>
 
         <div class="cell-full">
-            <div class="contribution-id">Contribution n&#186; {{ c.id
-                }}
-                <span class="contribution-date"> - {{ c.formatted_time }}</span>
+            <div class="contribution-id">Contribution n&#186; {{ c.id }}
+                <span class="contribution-author"> - {{ c.anonymized_contributor }}</span>
             </div>
-            <div class="contribution-author">Auteur {{c.anonymized_contributor }}</div>
+            <div class="contribution-date">{{ c.formatted_time }}</div>
             <div class="contribution-body">{{ c.body }}</div>
         </div>
 

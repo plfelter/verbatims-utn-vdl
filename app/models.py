@@ -69,16 +69,16 @@ class Contribution(db.Model):
         # Correct syntax for SQLAlchemy's case function
         return case(
             (func.lower(cls.contributor) == 'anonyme', cls.contributor),
-            else_='anonymisé'
+            else_='anonymisée'
         ).label('anonymized_contributor')
 
     @staticmethod
     def anonymise_contributor(contributor):
         """Anonymize the contributor name."""
-        contributor = contributor.lower()
-        if contributor == 'anonyme':
+        # contributor = contributor.lower()
+        if contributor.lower() == 'anonyme':
             return contributor
-        return 'anonymisé'
+        return 'Anonymisée'
 
     def __repr__(self):
         return f'<Contribution {self.id} by {self.contributor}>'
