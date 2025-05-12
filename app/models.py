@@ -13,7 +13,7 @@ class SearchLog(db.Model):
     __tablename__ = 'search_logs'
 
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.now(tz=pytz.timezone('Europe/Paris')))
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
     search_content = db.Column(db.Text, nullable=False)
     ip_address = db.Column(db.String(45), nullable=False)  # IPv6 can be up to 45 chars
 
@@ -91,7 +91,7 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(tz=pytz.timezone('Europe/Paris')))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
     upvotes = db.Column(db.Integer, default=0)
     downvotes = db.Column(db.Integer, default=0)
 
