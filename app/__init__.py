@@ -6,7 +6,7 @@ persistent_path: Path = Path(__file__).resolve().parent
 db_path = persistent_path / "database" / "sqlite.db"
 
 # App settings
-anonymise_contributors = True
+anonymise_contributors = False
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = f'sqlite:///{db_path}'
