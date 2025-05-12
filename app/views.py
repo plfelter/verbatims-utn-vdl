@@ -178,7 +178,9 @@ def discussion():
     if request.method == 'POST':
         # Handle form submission for creating a new comment
         username = request.form.get('username')
+        email = request.form.get('email')
         body = request.form.get('body')
+        ip_address = request.remote_addr
 
         if not username or not body:
             comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(),
@@ -187,7 +189,7 @@ def discussion():
             return render_template('discussion.html', comments=comments,
                                        error="Username and comment are required", is_htmx=is_htmx)
 
-        new_comment = Comment(username=username, body=body)
+        new_comment = Comment(username=username, email=email, body=body, ip_address=ip_address)
 
         try:
             db.session.add(new_comment)
@@ -265,13 +267,15 @@ def add_answer(comment_id):
 
     # Get form data
     username = request.form.get('username')
+    email = request.form.get('email')
     body = request.form.get('body')
+    ip_address = request.remote_addr
 
     if not username or not body:
         return f"Error: Username and answer are required", 400
 
     # Create new answer
-    new_answer = Answer(username=username, body=body, comment_id=comment_id)
+    new_answer = Answer(username=username, email=email, body=body, ip_address=ip_address, comment_id=comment_id)
 
     try:
         db.session.add(new_answer)

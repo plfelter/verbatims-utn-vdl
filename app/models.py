@@ -90,6 +90,8 @@ class Comment(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(120), nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)  # IPv6 can be up to 45 chars
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
     upvotes = db.Column(db.Integer, default=0)
@@ -113,6 +115,8 @@ class Answer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(120), nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)  # IPv6 can be up to 45 chars
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
     comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'), nullable=False)
