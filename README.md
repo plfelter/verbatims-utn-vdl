@@ -9,10 +9,13 @@ Reach it online at http://verbatims-utn-vdl.webpil.ovh.
 ```mermaid
 ---
 config:
-  theme: redux
+  theme: neutral
   layout: elk
+  elk:
+    mergeEdges: true
+    nodePlacementStrategy: SIMPLE
 ---
-flowchart TD
+flowchart RL
  subgraph DevPlatform["Development computer"]
         Dev_app["Web app in development"]
   end
@@ -22,7 +25,8 @@ flowchart TD
   end
  subgraph Server["Ubuntu server"]
         Container
-        Ubuntu_db["Database replica"]
+     Ubuntu_db["Production database"]
+     Ubuntu_backup_db["Database backup"]
   end
  subgraph FTP["FTP server"]
         Freebox_db["Database replica"]
@@ -31,8 +35,8 @@ flowchart TD
         FTP
   end
     Production_app -- writes to --> Container_db
-    Dev_app -- generates --> Container
-    Ubuntu_db -- copies periodically --> Container_db
-    Ubuntu_db -- copies on app upgrade --> Container_db
+    Ubuntu_backup_db -- copies on app upgrade --> Container_db
+    Ubuntu_db <-- Docker bind mount --> Container_db
     Ubuntu_db -- dumps copies periodically --> Freebox_db
+    Dev_app -- generates --> Container
 ```

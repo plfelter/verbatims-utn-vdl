@@ -26,13 +26,17 @@ SSH_USER="ubuntu"
 SSH_HOST="162.19.242.144"
 GITHUB_REPO="https://github.com/plfelter/verbatims-utn-vdl.git"
 REMOTE_REPO_DIR="/home/ubuntu/verbatims-utn-vdl"
+APP_DB_PATH="app/database/sqlite.db"
 LOCAL_DOCKER_INSTALL_SCRIPT_PATH="$HOME/dv/verbatims-utn-vdl/scripts/install-docker-ubuntu"
 REMOTE_DOCKER_INSTALL_SCRIPT_PATH="/tmp/install-docker-ubuntu"
 HOST_PORT="80"
 CONTAINER_PORT="5001"
 DOCKER_IMAGE_NAME="verbatims-utn-vdl-image"
 DOCKER_CONTAINER_NAME="verbatims-utn-vdl-container"
-DOCKER_APP_DB_PATH="/verbatims-utn-vdl-app/app/sqlite.db"
+DOCKER_APP_REPO_DIR="/verbatims-utn-vdl-app"
+DOCKER_APP_DB_PATH="$DOCKER_APP_REPO_DIR/$APP_DB_PATH"
+DOCKER_BIND_MOUNT_DB_HOST_DIR="$(dirname -- "$REMOTE_REPO_DIR/$APP_DB_PATH")"
+DOCKER_BIND_MOUNT_DB_CONTAINER_DIR="$(dirname -- "$DOCKER_APP_REPO_DIR/$APP_DB_PATH")"
 DOCKER_TMP_BACKUP_DB_PATH="/tmp/verbatims-utn-vdl-$(date +"%Y%m%d_%H%M%S")-sqlite.db"
 LOCAL_BACKUP_DB_PATH="$HOME/dv/verbatims-utn-vdl/db-backups/"
 
@@ -56,22 +60,6 @@ else
     print_error "Docker installation failed"
 fi
 
-# Remotely clone repo
-print_message "Cloning repository on remote server"
-echo "Checking for existing repository directory..."
-if ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "if [ -d $REMOTE_REPO_DIR ]; then rm -rf $REMOTE_REPO_DIR; echo 'Removed existing repository directory'; else echo 'Repository directory does not exist'; fi"; then
-    print_success "Repository directory checked"
-else
-    print_error "Failed to check repository directory"
-fi
-
-echo "Cloning repository from $GITHUB_REPO..."
-if ssh -p $SSH_PORT $HOST "git clone $GITHUB_REPO"; then
-    print_success "Repository cloned to $REMOTE_REPO_DIR"
-else
-    print_error "Failed to clone repository"
-fi
-
 # Remotely save database
 print_message "Backing up database from existing container"
 echo "Copying database from container to temporary location on remote server..."
@@ -86,6 +74,23 @@ if scp -p -P $SSH_PORT $HOST:"$DOCKER_TMP_BACKUP_DB_PATH" "$LOCAL_BACKUP_DB_PATH
     print_success "Database backup saved to $LOCAL_BACKUP_DB_PATH"
 else
     echo "Warning: Could not copy database backup to local machine. This might be normal for first deployment."
+fi
+
+# Remotely clone or update repo
+print_message "Cloning or updating repository on remote server"
+echo "Checking for existing repository directory..."
+if ssh -p $SSH_PORT $SSH_USER@$SSH_HOST "if [ -d $REMOTE_REPO_DIR ]; then
+    echo 'Repository directory exists, updating...';
+    cd $REMOTE_REPO_DIR && git pull;
+    exit \$?;
+else
+    echo 'Repository directory does not exist, will clone';
+    git clone $GITHUB_REPO $REMOTE_REPO_DIR;
+    exit \$?;
+fi"; then
+    print_success "Repository operation completed successfully"
+else
+    print_error "Failed to clone or update repository"
 fi
 
 # Remotely stop running docker image
@@ -114,7 +119,7 @@ else
 fi
 
 echo "Running Docker container $DOCKER_CONTAINER_NAME on port $HOST_PORT..."
-if ssh -p $SSH_PORT $HOST "docker run --detach -p $HOST_PORT:$CONTAINER_PORT --name $DOCKER_CONTAINER_NAME $DOCKER_IMAGE_NAME"; then
+if ssh -p $SSH_PORT $HOST "docker run --mount type=bind,src=$DOCKER_BIND_MOUNT_DB_HOST_DIR,dst=$DOCKER_BIND_MOUNT_DB_CONTAINER_DIR --detach -p $HOST_PORT:$CONTAINER_PORT --name $DOCKER_CONTAINER_NAME $DOCKER_IMAGE_NAME"; then
     print_success "Docker container started successfully"
 else
     print_error "Failed to start Docker container"

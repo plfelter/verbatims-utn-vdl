@@ -17,7 +17,8 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 # Add Poetry to PATH
 ENV PATH="${PATH}:/root/.local/bin"
 
-# Copy poetry configuration files first (dockerfile layers are cachable: subsequent builds will skip unchanged steps)
+# Copy poetry configuration files first (dockerfile layers are cachable: subsequent builds will skip unchanged steps;
+# it is more performant to only load useful files)
 COPY pyproject.toml poetry.lock* ./
 
 # Configure poetry to not create a virtual environment
@@ -26,10 +27,9 @@ COPY pyproject.toml poetry.lock* ./
 # Install dependencies
 RUN poetry install --no-interaction --no-ansi --without dev --no-root
 
-# Copy the rest of the application (that might have changed since previous build)
+# Copy the rest of the application and the server database (when it exists)
 COPY . .
 
-# TODO copy latest version of the sqlite database
 
 # Expose the port the app runs on
 EXPOSE 5001

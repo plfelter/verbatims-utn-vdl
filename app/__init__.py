@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from pathlib import Path
 
 persistent_path: Path = Path(__file__).resolve().parent
-db_path = persistent_path / "sqlite.db"
+db_path = persistent_path / "database" / "sqlite.db"
 
 # App settings
 anonymise_contributors = True
