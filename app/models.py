@@ -95,6 +95,9 @@ class Comment(db.Model):
     upvotes = db.Column(db.Integer, default=0)
     downvotes = db.Column(db.Integer, default=0)
 
+    # Relationship with answers
+    answers = db.relationship('Answer', backref='comment', lazy='dynamic', cascade='all, delete-orphan')
+
     @property
     def vote_score(self):
         """Calculate the total vote score (upvotes - downvotes)."""
@@ -102,5 +105,19 @@ class Comment(db.Model):
 
     def __repr__(self):
         return f'<Comment {self.id} by {self.username}>'
+
+
+class Answer(db.Model):
+    """Answer model for storing replies to comments."""
+    __tablename__ = 'answers'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
+    comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Answer {self.id} to comment {self.comment_id} by {self.username}>'
 
 # You can add more models as needed for your application

@@ -29,4 +29,48 @@
             </span>
         </div>
     </div>
+
+    <!-- Answers Section -->
+    <div class="answers-section">
+        <!-- Display existing answers -->
+        {% if comment.answers.count() > 0 %}
+            <h4>Answers:</h4>
+            <div class="answers-list">
+                {% for answer in comment.answers %}
+                    <div class="answer">
+                        <div class="answer-header">
+                            <strong>{{ answer.username }}</strong>
+                            <span class="answer-timestamp">{{ answer.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </div>
+                        <div class="answer-body">
+                            {{ answer.body }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Answer Form -->
+        <div class="answer-form-toggle">
+            <button 
+                class="toggle-answer-form-button"
+                onclick="document.getElementById('answer-form-{{ comment.id }}').style.display = document.getElementById('answer-form-{{ comment.id }}').style.display === 'none' ? 'block' : 'none'">
+                Reply to this comment
+            </button>
+        </div>
+
+        <div id="answer-form-{{ comment.id }}" class="answer-form" style="display: none;">
+            <form hx-post="/comment/{{ comment.id }}/answer" hx-target="#comment-{{ comment.id }}" hx-swap="outerHTML">
+                <div>
+                    <label for="username-{{ comment.id }}">Your Name:</label><br>
+                    <input type="text" id="username-{{ comment.id }}" name="username" required>
+                </div>
+                <div>
+                    <label for="body-{{ comment.id }}">Your Answer:</label><br>
+                    <textarea id="body-{{ comment.id }}" name="body" rows="3" required></textarea>
+                </div>
+                <button type="submit">Post Answer</button>
+            </form>
+        </div>
+    </div>
 </div>

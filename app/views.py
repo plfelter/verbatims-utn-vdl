@@ -5,7 +5,7 @@ from markupsafe import Markup
 from sqlalchemy import or_
 
 from app import app, db
-from app.models import Contribution, Comment, SearchLog
+from app.models import Contribution, Comment, Answer, SearchLog
 
 
 def highlight_keywords(text, keywords):
@@ -249,6 +249,32 @@ def downvote_comment(comment_id):
     comment.downvotes += 1
 
     try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return f"Error: {str(e)}", 500
+
+    # Return the updated comment HTML
+    return render_template('comment_partial.html', comment=comment)
+
+
+@app.route('/comment/<int:comment_id>/answer', methods=['POST'])
+def add_answer(comment_id):
+    """Add an answer to a comment."""
+    comment = Comment.query.get_or_404(comment_id)
+
+    # Get form data
+    username = request.form.get('username')
+    body = request.form.get('body')
+
+    if not username or not body:
+        return f"Error: Username and answer are required", 400
+
+    # Create new answer
+    new_answer = Answer(username=username, body=body, comment_id=comment_id)
+
+    try:
+        db.session.add(new_answer)
         db.session.commit()
     except Exception as e:
         db.session.rollback()

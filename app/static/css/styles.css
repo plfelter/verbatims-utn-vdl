@@ -324,6 +324,71 @@ button:focus:not(:active)::after {
     font-size: 0.9rem;
 }
 
+/* ===== ANSWERS SECTION ===== */
+.answers-section {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--medium-gray);
+}
+
+.answers-list {
+    margin-bottom: 15px;
+}
+
+.answer {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+    animation: fadeIn 0.5s ease-out;
+    transition: var(--transition-normal);
+}
+
+.answer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.answer-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.answer-timestamp {
+    color: #777;
+    font-size: 0.8rem;
+}
+
+.answer-body {
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.answer-form-toggle {
+    margin-bottom: 10px;
+}
+
+.toggle-answer-form-button {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    background-color: var(--secondary-color);
+}
+
+.toggle-answer-form-button:hover {
+    background-color: var(--primary-color);
+    animation: none; /* Override the general button pulse animation */
+}
+
+.answer-form {
+    margin-top: 10px;
+    padding: 15px;
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+    animation: fadeIn 0.5s ease-out;
+}
+
 /* ===== CONTRIBUTIONS PAGE ===== */
 .contributions-grid {
     display: grid;
