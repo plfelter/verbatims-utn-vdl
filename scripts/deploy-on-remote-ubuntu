@@ -38,7 +38,7 @@ DOCKER_APP_DB_PATH="$DOCKER_APP_REPO_DIR/$APP_DB_PATH"
 DOCKER_BIND_MOUNT_DB_HOST_DIR="$(dirname -- "$REMOTE_REPO_DIR/$APP_DB_PATH")"
 DOCKER_BIND_MOUNT_DB_CONTAINER_DIR="$(dirname -- "$DOCKER_APP_REPO_DIR/$APP_DB_PATH")"
 DOCKER_TMP_BACKUP_DB_PATH="/tmp/verbatims-utn-vdl-$(date +"%Y%m%d_%H%M%S")-sqlite.db"
-LOCAL_BACKUP_DB_PATH="$HOME/dv/verbatims-utn-vdl/db-backups/"
+LOCAL_BACKUP_DB_PATH="$HOME/dv/verbatims-utn-vdl/scripts/db-backups/"
 
 HOST="$SSH_USER@$SSH_HOST"
 
