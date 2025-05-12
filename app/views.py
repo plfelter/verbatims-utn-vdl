@@ -5,7 +5,7 @@ from markupsafe import Markup
 from sqlalchemy import or_
 
 from app import app, db
-from app.models import Contribution, Comment, Answer, SearchLog
+from app.models import Contribution, Comment, Answer, SearchLog, AnalyseChat
 
 
 def highlight_keywords(text, keywords):
@@ -288,3 +288,46 @@ def add_answer(comment_id):
     return render_template('comment_partial.html', comment=comment)
 
 # You can add more routes as needed for your application
+
+
+@app.route('/analyse', methods=['GET', 'POST'])
+def analyse():
+    """
+    Analyse page with chat functionality.
+    - GET: Initial page load with empty chat
+    - POST: Process user prompt and return response
+    """
+    if request.method == 'POST':
+        # Get the user prompt from the form
+        prompt = request.form.get('prompt', '')
+
+        if not prompt:
+            return "Error: Prompt cannot be empty", 400
+
+        # Get the requester's IP address
+        ip_address = request.remote_addr
+
+        # Create the server response
+        server_response = f"Message received. You said: {prompt}"
+
+        # Log the chat in the database using the new AnalyseChat model
+        chat_log = AnalyseChat(
+            user_message=prompt,
+            server_response=server_response,
+            ip_address=ip_address
+        )
+
+        try:
+            db.session.add(chat_log)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return f"Error logging chat: {str(e)}", 500
+
+        # Return the message exchange HTML
+        return render_template('analyse_message.html', 
+                              user_message=prompt, 
+                              server_message=server_response)
+
+    # For GET requests, render the initial template
+    return render_template('analyse.html')

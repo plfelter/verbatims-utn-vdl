@@ -124,4 +124,17 @@ class Answer(db.Model):
     def __repr__(self):
         return f'<Answer {self.id} to comment {self.comment_id} by {self.username}>'
 
+class AnalyseChat(db.Model):
+    """Model for storing chat messages from the analyse view."""
+    __tablename__ = 'analyse_chats'
+
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
+    user_message = db.Column(db.Text, nullable=False)
+    server_response = db.Column(db.Text, nullable=False)
+    ip_address = db.Column(db.String(45), nullable=False)  # IPv6 can be up to 45 chars
+
+    def __repr__(self):
+        return f'<AnalyseChat {self.id} from {self.ip_address}>'
+
 # You can add more models as needed for your application

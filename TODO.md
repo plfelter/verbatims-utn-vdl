@@ -2,11 +2,11 @@
 
 ## Développement de fonctionnalités
 
-- [ ] Champ de recherche textuelle et affichage des contributions contenant les mots correspondants (sauvegarde des
+- [x] Champ de recherche textuelle et affichage des contributions contenant les mots correspondants (sauvegarde des
   recherches dans table dédiée)
 - [ ] Champ textuel pour chat avec IA sur le corpus de verbatims (sauvegarde des recherches dans une table dédiée)
 - [ ] Développer page pour afficher les mentions
-  légales https://www.economie.gouv.fr/entreprises/site-internet-mentions-obligatoires
+  légales https://www.economie.gouv.fr/entreprises/site-internet-mentions-obligatoires: 
 
 ## Developpement opérationnel
 

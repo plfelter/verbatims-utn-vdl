@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Analyse - VDL UTNS Verbatims{% endblock %}
+
+{% block content %}
+    <div class="chat-container">
+        <div id="messages-container" class="messages-container">
+            <!-- Messages will be appended here -->
+        </div>
+
+        <form hx-post="{{ url_for('analyse') }}" 
+              hx-target="#messages-container" 
+              hx-swap="beforeend" 
+              class="prompt-container">
+            <input type="text" 
+                   name="prompt" 
+                   class="prompt-input" 
+                   placeholder="Type your message here..." 
+                   required>
+        </form>
+    </div>
+
+    <script>
+        // Auto-scroll to bottom when new messages are added
+        document.body.addEventListener('htmx:afterSwap', function() {
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+
+        // Submit form on Enter key
+        document.querySelector('.prompt-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.form.dispatchEvent(new Event('submit'));
+                this.value = ''; // Clear input after submission
+            }
+        });
+    </script>
+{% endblock %}
