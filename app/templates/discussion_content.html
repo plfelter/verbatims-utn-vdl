@@ -25,38 +25,7 @@
         <h2>Comments (Sorted by Votes)</h2>
         {% if comments %}
             {% for comment in comments %}
-            <div id="comment-{{ comment.id }}" class="comment">
-                <div class="comment-header">
-                    <strong>{{ comment.username }}</strong>
-                    <span class="comment-timestamp">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-                </div>
-                <div class="comment-body">
-                    {{ comment.body }}
-                </div>
-                <div class="comment-actions">
-                    <div class="vote-buttons">
-                        <button 
-                            class="upvote-button"
-                            hx-post="/comment/{{ comment.id }}/upvote" 
-                            hx-target="#comment-{{ comment.id }}"
-                            hx-swap="outerHTML">
-                            👍 Upvote
-                        </button>
-                        <button 
-                            class="downvote-button"
-                            hx-post="/comment/{{ comment.id }}/downvote" 
-                            hx-target="#comment-{{ comment.id }}"
-                            hx-swap="outerHTML">
-                            👎 Downvote
-                        </button>
-                    </div>
-                    <div class="vote-count">
-                        <span title="Upvotes: {{ comment.upvotes }}, Downvotes: {{ comment.downvotes }}">
-                            Score: <strong>{{ comment.vote_score }}</strong>
-                        </span>
-                    </div>
-                </div>
-            </div>
+                {% include 'comment_partial.html' %}
             {% endfor %}
         {% else %}
             <p>No comments yet. Be the first to comment!</p>
