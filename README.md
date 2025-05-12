@@ -15,28 +15,30 @@ config:
     mergeEdges: true
     nodePlacementStrategy: SIMPLE
 ---
-flowchart RL
- subgraph DevPlatform["Development computer"]
-        Dev_app["Web app in development"]
-  end
- subgraph Container["Docker container"]
+flowchart TD
+    subgraph Server["Ubuntu server"]
+        Container
+        Ubuntu_db["Production database"]
+        Ubuntu_backup_db["Database backup"]
+    end
+    subgraph Container["Docker container"]
         Container_db["Production database"]
         Production_app["Web app in production"]
-  end
- subgraph Server["Ubuntu server"]
-        Container
-     Ubuntu_db["Production database"]
-     Ubuntu_backup_db["Database backup"]
-  end
- subgraph FTP["FTP server"]
+    end
+    subgraph DevPlatform["Development computer"]
+        Dev_app["Web app in development"]
+        Dev_backup_db["Database backup"]
+    end
+    subgraph FTP["FTP server"]
         Freebox_db["Database replica"]
-  end
- subgraph Freebox["Freebox server"]
+    end
+    subgraph Freebox["Freebox server"]
         FTP
-  end
-    Production_app -- writes to --> Container_db
-    Ubuntu_backup_db -- copies on app upgrade --> Container_db
-    Ubuntu_db <-- Docker bind mount --> Container_db
+    end
     Ubuntu_db -- dumps copies periodically --> Freebox_db
-    Dev_app -- generates --> Container
+    Dev_app -- deploys to --> Container
+    Container_db -- copy on app upgrade --> Ubuntu_backup_db
+    Ubuntu_backup_db -- copy on app upgrade --> Dev_backup_db
+    Production_app -- edits --> Container_db
+    Ubuntu_db <-- Docker bind mount --> Container_db
 ```
