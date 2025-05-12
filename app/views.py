@@ -304,11 +304,16 @@ def analyse():
         if not prompt:
             return "Error: Prompt cannot be empty", 400
 
+        # Get the previous messages from the form (if any)
+        previous_messages = request.form.get('previous_messages', '')
+
         # Get the requester's IP address
         ip_address = request.remote_addr
 
         # Create the server response
-        server_response = f"Message received. You said: {prompt}"
+        # Here you could use the previous_messages to inform the response
+        # For example, by passing them to an AI model or using them for context
+        server_response = f"You typed in:{prompt}"
 
         # Log the chat in the database using the new AnalyseChat model
         chat_log = AnalyseChat(

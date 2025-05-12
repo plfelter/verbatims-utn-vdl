@@ -17,6 +17,7 @@
                    class="prompt-input" 
                    placeholder="Type your message here..." 
                    required>
+            <input type="hidden" name="previous_messages" id="previous-messages">
         </form>
     </div>
 
@@ -27,13 +28,51 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         });
 
+        // Function to collect all previous messages from the chat
+        function collectPreviousMessages() {
+            const messagesContainer = document.getElementById('messages-container');
+            const messageWrappers = messagesContainer.querySelectorAll('.message-wrapper');
+
+            let messages = [];
+            // Process message wrappers in pairs (user message followed by server message)
+            for (let i = 0; i < messageWrappers.length; i += 2) {
+                // Check if we have both user and server message wrappers
+                if (i + 1 < messageWrappers.length) {
+                    const userWrapper = messageWrappers[i];
+                    const serverWrapper = messageWrappers[i + 1];
+
+                    const userMessage = userWrapper.querySelector('.user-message');
+                    const serverMessage = serverWrapper.querySelector('.server-message');
+
+                    if (userMessage && serverMessage) {
+                        messages.push({
+                            user: userMessage.textContent.trim(),
+                            server: serverMessage.textContent.trim()
+                        });
+                    }
+                }
+            }
+
+            return JSON.stringify(messages);
+        }
+
         // Submit form on Enter key
         document.querySelector('.prompt-input').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
+
+                // Collect previous messages and set the hidden input value
+                document.getElementById('previous-messages').value = collectPreviousMessages();
+
                 this.form.dispatchEvent(new Event('submit'));
                 this.value = ''; // Clear input after submission
             }
+        });
+
+        // Also handle normal form submission
+        document.querySelector('.prompt-container').addEventListener('submit', function() {
+            // Collect previous messages and set the hidden input value
+            document.getElementById('previous-messages').value = collectPreviousMessages();
         });
     </script>
 {% endblock %}
