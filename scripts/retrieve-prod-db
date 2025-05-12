@@ -1,0 +1,7 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+if scp -P 58734 ubuntu@162.19.242.144:/home/ubuntu/verbatims-utn-vdl/app/database/sqlite.db "$SCRIPT_DIR"/prod-sqlite.db; then
+  echo "Production database saved to $SCRIPT_DIR/prod-sqlite.db"
+fi

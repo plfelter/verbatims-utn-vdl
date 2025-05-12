@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Define color codes for output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Function to print status messages
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+# Function to print success messages
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+# Function to print error messages and exit
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+    exit 1
+}
+
+# Check if the database path argument is provided
+if [ $# -eq 0 ]; then
+    print_error "Database path argument is required\nUsage: $0 <path_to_database>"
+fi
+
+DB_TO_PUBLISH_PATH="$1"
+
+# Check if the database file exists
+if [ ! -f "$DB_TO_PUBLISH_PATH" ]; then
+    print_error "Database file does not exist: $DB_TO_PUBLISH_PATH"
+fi
+
+SSH_PORT="58734"
+SSH_USER="ubuntu"
+SSH_HOST="162.19.242.144"
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+BACKUP_DIR="$SCRIPT_DIR/db-backups"
+BACKUP_DB_PATH="$BACKUP_DIR/verbatims-utn-vdl-$(date +"%Y%m%d_%H%M%S")-sqlite.db"
+
+# Create backup directory if it doesn't exist
+if [ ! -d "$BACKUP_DIR" ]; then
+    print_status "Creating backup directory: $BACKUP_DIR"
+    mkdir -p "$BACKUP_DIR"
+fi
+
+print_status "Saving production database to $BACKUP_DB_PATH"
+if scp -P $SSH_PORT $SSH_USER@$SSH_HOST:/home/ubuntu/verbatims-utn-vdl/app/database/sqlite.db "$BACKUP_DB_PATH"; then
+    print_success "Production database backup completed"
+else
+    print_error "Failed to backup production database"
+fi
+
+print_status "Uploading database $DB_TO_PUBLISH_PATH to production server"
+if scp -P $SSH_PORT "$DB_TO_PUBLISH_PATH" $SSH_USER@$SSH_HOST:/home/ubuntu/verbatims-utn-vdl/app/database/sqlite.db; then
+    print_success "Database successfully uploaded to production server"
+else
+    print_error "Failed to upload database to production server"
+fi
+
+print_success "All operations completed successfully"
