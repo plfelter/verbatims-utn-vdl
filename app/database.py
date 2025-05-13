@@ -12,7 +12,7 @@ class DatabaseInitializer:
     def __init__(self, app):
         """Initialize with Flask app instance."""
         self.app = app
-        self.contributions_json_path = Path(__file__).resolve().parent.parent / "verbatims" / "contributions.json"
+        self.contributions_json_path = Path(__file__).resolve().parent.parent / "resources" /"verbatims" / "contributions.json"
     
     def is_contributions_table_empty(self):
         """Check if the contributions table is empty."""

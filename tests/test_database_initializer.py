@@ -49,7 +49,7 @@ class TestDatabaseInitializer(unittest.TestCase):
     def test_load_contributions_data(self):
         """Test the load_contributions_data method."""
         # Ensure the contributions.json file exists
-        contributions_json_path = Path(__file__).resolve().parent.parent / "verbatims" / "contributions.json"
+        contributions_json_path = Path(__file__).resolve().parent.parent / "resources" / "verbatims" / "contributions.json"
         self.assertTrue(os.path.exists(contributions_json_path), "contributions.json file not found")
         
         # Load the data

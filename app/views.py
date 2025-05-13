@@ -356,7 +356,7 @@ def download_file(file_type):
 
     # Get the project root directory
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    verbatims_dir = os.path.join(root_dir, 'verbatims')
+    verbatims_dir = os.path.join(root_dir, 'resources', 'verbatims')
 
     # Define the file name based on the requested type
     file_name = f"contributions-anonymisees.{file_type}"
