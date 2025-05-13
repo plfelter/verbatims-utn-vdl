@@ -6,29 +6,6 @@
     <div class="comment-body">
         {{ comment.body }}
     </div>
-    <div class="comment-actions">
-        <div class="vote-buttons">
-            <button 
-                class="upvote-button"
-                hx-post="/comment/{{ comment.id }}/upvote" 
-                hx-target="#comment-{{ comment.id }}"
-                hx-swap="outerHTML">
-                👍 Upvote
-            </button>
-            <button 
-                class="downvote-button"
-                hx-post="/comment/{{ comment.id }}/downvote" 
-                hx-target="#comment-{{ comment.id }}"
-                hx-swap="outerHTML">
-                👎 Downvote
-            </button>
-        </div>
-        <div class="vote-count">
-            <span title="Upvotes: {{ comment.upvotes }}, Downvotes: {{ comment.downvotes }}">
-                Score: <strong>{{ comment.vote_score }}</strong>
-            </span>
-        </div>
-    </div>
 
     <!-- Answers Section -->
     <div class="answers-section">

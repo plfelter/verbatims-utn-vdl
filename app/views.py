@@ -193,7 +193,6 @@ def discussion():
 
         if not username or not body or not email:
             comments = Comment.query.filter_by(confirmed=True).order_by(
-                (Comment.upvotes - Comment.downvotes).desc(),
                 Comment.created_at.desc()
             ).all()
             is_htmx = request.headers.get('HX-Request') == 'true'
@@ -224,7 +223,6 @@ def discussion():
 
             # After successful comment creation, return the updated page
             comments = Comment.query.filter_by(confirmed=True).order_by(
-                (Comment.upvotes - Comment.downvotes).desc(),
                 Comment.created_at.desc()
             ).all()
             is_htmx = request.headers.get('HX-Request') == 'true'
@@ -234,17 +232,14 @@ def discussion():
         except Exception as e:
             db.session.rollback()
             comments = Comment.query.filter_by(confirmed=True).order_by(
-                (Comment.upvotes - Comment.downvotes).desc(),
                 Comment.created_at.desc()
             ).all()
             is_htmx = request.headers.get('HX-Request') == 'true'
             return render_template('discussion.html', comments=comments,
                                    error=str(e), is_htmx=is_htmx)
 
-    # Get all confirmed comments ordered by vote score (highest first), then by creation date (newest first)
-    # We use a hybrid approach with a subquery to order by the calculated vote_score
+    # Get all confirmed comments ordered by creation date (newest first)
     comments = Comment.query.filter_by(confirmed=True).order_by(
-        (Comment.upvotes - Comment.downvotes).desc(), 
         Comment.created_at.desc()
     ).all()
 
@@ -257,43 +252,10 @@ def discussion():
     else:
         # Return JSON for API clients
         result = [{"id": comment.id, "username": comment.username, "body": comment.body,
-                   "created_at": comment.created_at.isoformat(),
-                   "upvotes": comment.upvotes, "downvotes": comment.downvotes,
-                   "vote_score": comment.vote_score} for comment in comments]
+                   "created_at": comment.created_at.isoformat()} for comment in comments]
         return jsonify(result)
 
 
-# Routes for upvoting and downvoting comments
-@app.route('/comment/<int:comment_id>/upvote', methods=['POST'])
-def upvote_comment(comment_id):
-    """Upvote a comment."""
-    comment = Comment.query.get_or_404(comment_id)
-    comment.upvotes += 1
-
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        return f"Error: {str(e)}", 500
-
-    # Return the updated comment HTML
-    return render_template('comment_partial.html', comment=comment)
-
-
-@app.route('/comment/<int:comment_id>/downvote', methods=['POST'])
-def downvote_comment(comment_id):
-    """Downvote a comment."""
-    comment = Comment.query.get_or_404(comment_id)
-    comment.downvotes += 1
-
-    try:
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        return f"Error: {str(e)}", 500
-
-    # Return the updated comment HTML
-    return render_template('comment_partial.html', comment=comment)
 
 
 @app.route('/comment/<int:comment_id>/answer', methods=['POST'])

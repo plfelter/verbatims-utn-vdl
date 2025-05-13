@@ -10,10 +10,6 @@
     --secondary-color: #2980b9;
     --accent-color: #e74c3c;
     --success-color: #27ae60;
-    --upvote-color: #4CAF50;
-    --upvote-hover-color: #45a049;
-    --downvote-color: #666666;
-    --downvote-hover-color: #555555;
     --user-message-bg: #dcf8c6;
     --server-message-bg: #f1f0f0;
 
@@ -437,51 +433,6 @@ button:focus:not(:active)::after {
     gap: 10px;
 }
 
-.vote-buttons {
-    display: flex;
-    gap: 5px;
-}
-
-.upvote-button, .downvote-button {
-    padding: 5px 10px;
-    font-size: 0.8rem;
-    transition: var(--transition-normal);
-}
-
-.upvote-button {
-    background-color: var(--upvote-color);
-}
-
-.upvote-button:hover {
-    background-color: var(--upvote-hover-color);
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
-    animation: none; /* Override the general button pulse animation */
-}
-
-.upvote-button:active {
-    transform: translateY(1px) scale(0.95);
-}
-
-.downvote-button {
-    background-color: var(--downvote-color);
-}
-
-.downvote-button:hover {
-    background-color: var(--downvote-hover-color);
-    transform: translateY(2px) scale(1.05);
-    box-shadow: 0 -4px 8px rgba(102, 102, 102, 0.3);
-    animation: none; /* Override the general button pulse animation */
-}
-
-.downvote-button:active {
-    transform: translateY(-1px) scale(0.95);
-}
-
-.vote-count {
-    margin-left: 10px;
-    font-size: 0.9rem;
-}
 
 /* ===== ANSWERS SECTION ===== */
 .answers-section {

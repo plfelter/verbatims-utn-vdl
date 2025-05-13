@@ -96,18 +96,11 @@ class Comment(db.Model):
     user_agent = db.Column(db.Text, nullable=True)  # Store user agent information
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
-    upvotes = db.Column(db.Integer, default=0)
-    downvotes = db.Column(db.Integer, default=0)
     confirmed = db.Column(db.Boolean, default=False)  # Whether the comment has been confirmed
     confirmation_token = db.Column(db.String(100), nullable=False)  # Token for email confirmation
 
     # Relationship with answers
     answers = db.relationship('Answer', backref='comment', lazy='dynamic', cascade='all, delete-orphan')
-
-    @property
-    def vote_score(self):
-        """Calculate the total vote score (upvotes - downvotes)."""
-        return self.upvotes - self.downvotes
 
     def __repr__(self):
         return f'<Comment {self.id} by {self.username}>'
