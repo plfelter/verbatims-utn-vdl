@@ -10,13 +10,12 @@
     <!-- Answers Section -->
     <div class="answers-section">
         <!-- Display existing answers -->
-        {% if comment.answers.filter_by(confirmed=True).count() > 0 %}
-            <h4>Answers:</h4>
+        {% if comment.answers.count() > 0 %}
             <div class="answers-list">
-                {% for answer in comment.answers.filter_by(confirmed=True) %}
+                {% for answer in comment.answers %}
                     <div class="answer">
                         <div class="answer-header">
-                            <strong>{{ answer.username }}</strong>
+                            <strong>&#8627; {{ answer.username }}</strong>
                             <span class="answer-timestamp">{{ answer.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
                         </div>
                         <div class="answer-body">
@@ -29,7 +28,7 @@
 
         <!-- Answer Form -->
         {% if answer_success %}
-        <div class="success-message">
+        <div class="success">
             {{ answer_success }}
         </div>
         {% endif %}
@@ -49,12 +48,16 @@
                     <input type="text" id="username-{{ comment.id }}" name="username" required>
                 </div>
                 <div>
-                    <label for="email-{{ comment.id }}">Your Email:</label><br>
-                    <input type="email" id="email-{{ comment.id }}" name="email" required>
+                    <label for="captcha-{{ comment.id }}">Enter the text shown below:</label><br>
+                    <input type="text" id="captcha-{{ comment.id }}" name="captcha" required>
+                    <div class="captcha-container">
+                        <img src="data:image/png;base64,{{ answer_captcha_images[comment.id] }}" alt="CAPTCHA">
+                        <input type="hidden" name="captcha_text" value="{{ answer_captcha_texts[comment.id] }}">
+                    </div>
                 </div>
                 <div>
                     <label for="body-{{ comment.id }}">Your Answer:</label><br>
-                    <textarea id="body-{{ comment.id }}" name="body" rows="3" required></textarea>
+                    <textarea id="body-{{ comment.id }}" name="body" rows="1" required></textarea>
                 </div>
                 <button type="submit">Post Answer</button>
             </form>

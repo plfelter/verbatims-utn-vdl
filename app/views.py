@@ -1,16 +1,15 @@
 import json
 import re
-import os
 from pathlib import Path
 
-from flask import render_template, request, jsonify, redirect, send_from_directory, url_for, flash
+from flask import render_template, request, jsonify, redirect, send_from_directory
 from markupsafe import Markup
 from mistralai import Mistral
 from sqlalchemy import or_
 
 from app import app, db
 from app.models import Contribution, Comment, Answer, SearchLog, AnalyseChat, DownloadLog
-from app.utils import generate_confirmation_token, send_confirmation_email
+from app.utils import generate_captcha, validate_captcha
 
 
 def highlight_keywords(text, keywords):
@@ -183,34 +182,59 @@ def get_contributions():
 @app.route('/discussion', methods=['GET', 'POST'])
 def discussion():
     """Discussion page with comments."""
+    is_htmx = request.headers.get('HX-Request') == 'true'
+
+    def get_db_comments():
+        return Comment.query.order_by(Comment.created_at.desc()).all()
+
+    def generate_captcha_for_comment_answers():
+        # Generate captchas for each answer form
+        answer_captcha_texts = {}
+        answer_captcha_images = {}
+        for comment in get_db_comments():  # Get all comments ordered by creation date (newest first)
+            answer_captcha_text, answer_captcha_image = generate_captcha()
+            answer_captcha_texts[comment.id] = answer_captcha_text
+            answer_captcha_images[comment.id] = answer_captcha_image
+        return answer_captcha_texts, answer_captcha_images
+
     if request.method == 'POST':
         # Handle form submission for creating a new comment
         username = request.form.get('username')
-        email = request.form.get('email')
         body = request.form.get('body')
+        captcha_input = request.form.get('captcha')
+        captcha_text = request.form.get('captcha_text')
         ip_address = request.remote_addr
         user_agent = request.headers.get('User-Agent', '')
 
-        if not username or not body or not email:
-            comments = Comment.query.filter_by(confirmed=True).order_by(
-                Comment.created_at.desc()
-            ).all()
-            is_htmx = request.headers.get('HX-Request') == 'true'
-            return render_template('discussion.html', comments=comments,
-                                   error="Username, email, and comment are required", is_htmx=is_htmx)
+        # Generate a new captcha for the form
+        new_captcha_text, new_captcha_image = generate_captcha()
+        answer_captcha_texts, answer_captcha_images = generate_captcha_for_comment_answers()
 
-        # Generate a confirmation token
-        confirmation_token = generate_confirmation_token()
+        if not username or not body:
+            return render_template('discussion.html', comments=get_db_comments(),
+                                   error="Username and comment are required",
+                                   captcha_text=new_captcha_text,
+                                   captcha_image=new_captcha_image,
+                                   answer_captcha_texts=answer_captcha_texts,
+                                   answer_captcha_images=answer_captcha_images,
+                                   is_htmx=is_htmx)
 
-        # Create a new comment with confirmed=False
+        # Validate the captcha
+        if not validate_captcha(captcha_input, captcha_text):
+            return render_template('discussion.html', comments=get_db_comments(),
+                                   error="Invalid captcha. Please try again.",
+                                   captcha_text=new_captcha_text,
+                                   captcha_image=new_captcha_image,
+                                   answer_captcha_texts=answer_captcha_texts,
+                                   answer_captcha_images=answer_captcha_images,
+                                   is_htmx=is_htmx)
+
+        # Create a new comment
         new_comment = Comment(
-            username=username, 
-            email=email, 
-            body=body, 
-            ip_address=ip_address, 
-            user_agent=user_agent,
-            confirmed=False,
-            confirmation_token=confirmation_token
+            username=username,
+            body=body,
+            ip_address=ip_address,
+            user_agent=user_agent
         )
 
         try:
@@ -218,44 +242,43 @@ def discussion():
             db.session.add(new_comment)
             db.session.commit()
 
-            # Send confirmation email
-            send_confirmation_email(email, confirmation_token, 'comment', new_comment.id)
-
             # After successful comment creation, return the updated page
-            comments = Comment.query.filter_by(confirmed=True).order_by(
-                Comment.created_at.desc()
-            ).all()
-            is_htmx = request.headers.get('HX-Request') == 'true'
-            return render_template('discussion.html', comments=comments, 
-                                   success="Your comment has been submitted. Please check your email to confirm it.", 
+            answer_captcha_texts, answer_captcha_images = generate_captcha_for_comment_answers()
+            return render_template('discussion.html', comments=get_db_comments(),
+                                   success="Your comment has been submitted successfully.",
+                                   captcha_text=new_captcha_text,
+                                   captcha_image=new_captcha_image,
+                                   answer_captcha_texts=answer_captcha_texts,
+                                   answer_captcha_images=answer_captcha_images,
                                    is_htmx=is_htmx)
         except Exception as e:
             db.session.rollback()
-            comments = Comment.query.filter_by(confirmed=True).order_by(
-                Comment.created_at.desc()
-            ).all()
-            is_htmx = request.headers.get('HX-Request') == 'true'
-            return render_template('discussion.html', comments=comments,
-                                   error=str(e), is_htmx=is_htmx)
+            return render_template('discussion.html', comments=get_db_comments(),
+                                   error=str(e),
+                                   captcha_text=new_captcha_text,
+                                   captcha_image=new_captcha_image,
+                                   answer_captcha_texts=answer_captcha_texts,
+                                   answer_captcha_images=answer_captcha_images,
+                                   is_htmx=is_htmx)
 
-    # Get all confirmed comments ordered by creation date (newest first)
-    comments = Comment.query.filter_by(confirmed=True).order_by(
-        Comment.created_at.desc()
-    ).all()
 
     # Check if the request wants HTML or JSON
     if request.args.get('format') != 'json':
-        # For HTML requests, check if it's an HTMX request
-        is_htmx = request.headers.get('HX-Request') == 'true'
-        # Return the template with the is_htmx flag
-        return render_template('discussion.html', comments=comments, is_htmx=is_htmx)
+        # Generate captcha for the comment form and for each answers form
+        captcha_text, captcha_image = generate_captcha()
+        answer_captcha_texts, answer_captcha_images = generate_captcha_for_comment_answers()
+        return render_template('discussion.html',
+                               comments=get_db_comments(),
+                               captcha_text=captcha_text,
+                               captcha_image=captcha_image,
+                               answer_captcha_texts=answer_captcha_texts,
+                               answer_captcha_images=answer_captcha_images,
+                               is_htmx=is_htmx)
     else:
         # Return JSON for API clients
         result = [{"id": comment.id, "username": comment.username, "body": comment.body,
-                   "created_at": comment.created_at.isoformat()} for comment in comments]
+                   "created_at": comment.created_at.isoformat()} for comment in get_db_comments()]
         return jsonify(result)
-
-
 
 
 @app.route('/comment/<int:comment_id>/answer', methods=['POST'])
@@ -265,42 +288,56 @@ def add_answer(comment_id):
 
     # Get form data
     username = request.form.get('username')
-    email = request.form.get('email')
     body = request.form.get('body')
+    captcha_input = request.form.get('captcha')
+    captcha_text = request.form.get('captcha_text')
     ip_address = request.remote_addr
     user_agent = request.headers.get('User-Agent', '')
 
-    if not username or not body or not email:
-        return f"Error: Username, email, and answer are required", 400
+    # Generate a new captcha for the answer form
+    new_captcha_text, new_captcha_image = generate_captcha()
 
-    # Generate a confirmation token
-    confirmation_token = generate_confirmation_token()
+    # Generate captchas for all answer forms
+    answer_captcha_texts = {comment.id: new_captcha_text}
+    answer_captcha_images = {comment.id: new_captcha_image}
 
-    # Create new answer with confirmed=False
+    if not username or not body:
+        return render_template('comment_partial.html', comment=comment,
+                               error="Username and answer are required",
+                               answer_captcha_texts=answer_captcha_texts,
+                               answer_captcha_images=answer_captcha_images)
+
+    # Validate the captcha
+    if not validate_captcha(captcha_input, captcha_text):
+        return render_template('comment_partial.html', comment=comment,
+                               error="Invalid captcha. Please try again.",
+                               answer_captcha_texts=answer_captcha_texts,
+                               answer_captcha_images=answer_captcha_images)
+
+    # Create new answer
     new_answer = Answer(
-        username=username, 
-        email=email, 
-        body=body, 
-        ip_address=ip_address, 
-        user_agent=user_agent, 
-        comment_id=comment_id,
-        confirmed=False,
-        confirmation_token=confirmation_token
+        username=username,
+        body=body,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        comment_id=comment_id
     )
 
     try:
         db.session.add(new_answer)
         db.session.commit()
-
-        # Send confirmation email
-        send_confirmation_email(email, confirmation_token, 'answer', new_answer.id)
     except Exception as e:
         db.session.rollback()
-        return f"Error: {str(e)}", 500
+        return render_template('comment_partial.html', comment=comment,
+                               error=f"Error: {str(e)}",
+                               answer_captcha_texts=answer_captcha_texts,
+                               answer_captcha_images=answer_captcha_images)
 
     # Return the updated comment HTML with success message
-    return render_template('comment_partial.html', comment=comment, 
-                          answer_success="Your answer has been submitted. Please check your email to confirm it.")
+    return render_template('comment_partial.html', comment=comment,
+                           answer_success="Your answer has been submitted successfully.",
+                           answer_captcha_texts=answer_captcha_texts,
+                           answer_captcha_images=answer_captcha_images)
 
 
 def get_mistral_answer(chat_messages: list[dict], prompt: str):
@@ -437,37 +474,3 @@ def a_propos():
     A propos page with information about the author and the project.
     """
     return render_template('a_propos.html')
-
-
-@app.route('/confirm/<content_type>/<int:content_id>/<token>')
-def confirm_content(content_type, content_id, token):
-    """
-    Confirm a comment or answer by validating the token.
-
-    Args:
-        content_type (str): Either 'comment' or 'answer'
-        content_id (int): The ID of the comment or answer
-        token (str): The confirmation token
-    """
-    if content_type not in ['comment', 'answer']:
-        return "Invalid content type", 400
-
-    # Get the content based on type
-    if content_type == 'comment':
-        content = Comment.query.get_or_404(content_id)
-    else:  # content_type == 'answer'
-        content = Answer.query.get_or_404(content_id)
-
-    # Validate the token
-    if content.confirmation_token != token:
-        return "Invalid or expired confirmation token", 400
-
-    # Mark the content as confirmed
-    content.confirmed = True
-
-    try:
-        db.session.commit()
-        return render_template('confirmation_success.html', content_type=content_type)
-    except Exception as e:
-        db.session.rollback()
-        return f"Error confirming {content_type}: {str(e)}", 500

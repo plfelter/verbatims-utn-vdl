@@ -1,50 +1,44 @@
-from flask_mail import Message
-from flask import url_for
-import secrets
+import os
+import base64
+import io
+from captcha.image import ImageCaptcha
+from flask import session
 
-from app import mail, app
+from app import app
 
-def generate_confirmation_token():
-    """Generate a secure token for email confirmation."""
-    return secrets.token_urlsafe(32)
-
-def send_confirmation_email(email, token, content_type, content_id):
+def generate_captcha():
     """
-    Send a confirmation email to the user.
-    
+    Generate a captcha image and text.
+
+    Returns:
+        tuple: (captcha_text, captcha_image_base64)
+    """
+    # Create a captcha image generator
+    image = ImageCaptcha(width=280, height=90)
+
+    # Generate a random captcha text
+    import random
+    import string
+    captcha_text = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+    # Generate the captcha image
+    captcha_image = image.generate(captcha_text)
+
+    # Convert the image to base64 for embedding in HTML
+    captcha_image.seek(0)
+    captcha_image_base64 = base64.b64encode(captcha_image.read()).decode('utf-8')
+
+    return captcha_text, captcha_image_base64
+
+def validate_captcha(user_input, captcha_text):
+    """
+    Validate the user's captcha input against the generated captcha text.
+
     Args:
-        email (str): The recipient's email address
-        token (str): The confirmation token
-        content_type (str): Either 'comment' or 'answer'
-        content_id (int): The ID of the comment or answer
+        user_input (str): The user's input
+        captcha_text (str): The generated captcha text
+
+    Returns:
+        bool: True if the input matches the captcha text, False otherwise
     """
-    # Generate the confirmation URL
-    confirm_url = url_for(
-        'confirm_content', 
-        token=token, 
-        content_type=content_type, 
-        content_id=content_id,
-        _external=True
-    )
-    
-    # Create the email subject and body
-    subject = f"Please confirm your {content_type}"
-    body = f"""
-    Thank you for your contribution!
-    
-    Please click the link below to confirm your {content_type}:
-    {confirm_url}
-    
-    Your {content_type} will appear on the website after confirmation.
-    
-    If you did not make this request, please ignore this email.
-    """
-    
-    # Create and send the email
-    msg = Message(
-        subject=subject,
-        recipients=[email],
-        body=body
-    )
-    
-    mail.send(msg)
+    return user_input and user_input.upper() == captcha_text

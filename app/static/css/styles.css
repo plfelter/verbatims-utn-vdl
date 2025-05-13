@@ -312,6 +312,23 @@ form {
     transition: var(--transition-normal);
 }
 
+/* Captcha styles */
+.captcha-container {
+    margin: 10px 0 15px 0;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid var(--dark-gray);
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+.captcha-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
 form:focus-within {
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
@@ -492,11 +509,36 @@ button:focus:not(:active)::after {
 }
 
 .answer-form {
-    margin-top: 10px;
-    padding: 15px;
+    margin-top: 5px;
+    padding: 10px;
     background-color: var(--light-gray);
     border-radius: var(--border-radius);
     animation: fadeIn 0.5s ease-out;
+}
+
+/* Reduce spacing in answer forms */
+.answer-form form {
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.answer-form input[type="text"],
+.answer-form textarea {
+    margin-bottom: 8px;
+    padding: 8px;
+}
+
+.answer-form .captcha-container {
+    margin: 5px 0 8px 0;
+    padding: 5px;
+}
+
+.answer-form label {
+    font-size: 0.9rem;
+}
+
+.answer-form div {
+    margin-bottom: 8px;
 }
 
 /* ===== CONTRIBUTIONS PAGE ===== */

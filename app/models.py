@@ -91,13 +91,10 @@ class Comment(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
-    email = db.Column(db.String(120), nullable=False)  # Email is now required for confirmation
     ip_address = db.Column(db.String(45), nullable=True)  # IPv6 can be up to 45 chars
     user_agent = db.Column(db.Text, nullable=True)  # Store user agent information
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
-    confirmed = db.Column(db.Boolean, default=False)  # Whether the comment has been confirmed
-    confirmation_token = db.Column(db.String(100), nullable=False)  # Token for email confirmation
 
     # Relationship with answers
     answers = db.relationship('Answer', backref='comment', lazy='dynamic', cascade='all, delete-orphan')
@@ -112,14 +109,11 @@ class Answer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
-    email = db.Column(db.String(120), nullable=False)  # Email is now required for confirmation
     ip_address = db.Column(db.String(45), nullable=True)  # IPv6 can be up to 45 chars
     user_agent = db.Column(db.Text, nullable=True)  # Store user agent information
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
     comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'), nullable=False)
-    confirmed = db.Column(db.Boolean, default=False)  # Whether the answer has been confirmed
-    confirmation_token = db.Column(db.String(100), nullable=False)  # Token for email confirmation
 
     def __repr__(self):
         return f'<Answer {self.id} to comment {self.comment_id} by {self.username}>'
