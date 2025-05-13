@@ -16,6 +16,7 @@ class SearchLog(db.Model):
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
     search_content = db.Column(db.Text, nullable=False)
     ip_address = db.Column(db.String(45), nullable=False)  # IPv6 can be up to 45 chars
+    user_agent = db.Column(db.Text, nullable=True)  # Store user agent information
 
     def __repr__(self):
         return f'<SearchLog {self.id} from {self.ip_address}>'
@@ -92,6 +93,7 @@ class Comment(db.Model):
     username = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), nullable=True)
     ip_address = db.Column(db.String(45), nullable=True)  # IPv6 can be up to 45 chars
+    user_agent = db.Column(db.Text, nullable=True)  # Store user agent information
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
     upvotes = db.Column(db.Integer, default=0)
@@ -117,6 +119,7 @@ class Answer(db.Model):
     username = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), nullable=True)
     ip_address = db.Column(db.String(45), nullable=True)  # IPv6 can be up to 45 chars
+    user_agent = db.Column(db.Text, nullable=True)  # Store user agent information
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
     comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'), nullable=False)
@@ -133,6 +136,7 @@ class AnalyseChat(db.Model):
     user_message = db.Column(db.Text, nullable=False)
     server_response = db.Column(db.Text, nullable=False)
     ip_address = db.Column(db.String(45), nullable=False)  # IPv6 can be up to 45 chars
+    user_agent = db.Column(db.Text, nullable=True)  # Store user agent information
 
     def __repr__(self):
         return f'<AnalyseChat {self.id} from {self.ip_address}>'
@@ -146,6 +150,7 @@ class DownloadLog(db.Model):
     timestamp = db.Column(db.DateTime, default=lambda: datetime.now(tz=pytz.timezone('Europe/Paris')))
     file_name = db.Column(db.Text, nullable=False)  # 'csv' or 'json'
     ip_address = db.Column(db.String(45), nullable=False)  # IPv6 can be up to 45 chars
+    user_agent = db.Column(db.Text, nullable=True)  # Store user agent information
 
     def __repr__(self):
         return f'<DownloadLog {self.id} - {self.file_type} from {self.ip_address}>'

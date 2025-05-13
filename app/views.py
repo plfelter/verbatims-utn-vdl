@@ -148,11 +148,14 @@ def get_contributions():
     if request.method == 'POST' and search_query:
         # Get the requester's IP address
         ip_address = request.remote_addr
+        # Get the user agent
+        user_agent = request.headers.get('User-Agent', '')
 
         # Create a new search log entry
         search_log = SearchLog(
             search_content=search_query,
-            ip_address=ip_address
+            ip_address=ip_address,
+            user_agent=user_agent
         )
 
         # Save the log to the database
@@ -185,6 +188,7 @@ def discussion():
         email = request.form.get('email')
         body = request.form.get('body')
         ip_address = request.remote_addr
+        user_agent = request.headers.get('User-Agent', '')
 
         if not username or not body:
             comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(),
@@ -193,7 +197,7 @@ def discussion():
             return render_template('discussion.html', comments=comments,
                                    error="Username and comment are required", is_htmx=is_htmx)
 
-        new_comment = Comment(username=username, email=email, body=body, ip_address=ip_address)
+        new_comment = Comment(username=username, email=email, body=body, ip_address=ip_address, user_agent=user_agent)
 
         try:
             db.session.add(new_comment)
@@ -274,12 +278,13 @@ def add_answer(comment_id):
     email = request.form.get('email')
     body = request.form.get('body')
     ip_address = request.remote_addr
+    user_agent = request.headers.get('User-Agent', '')
 
     if not username or not body:
         return f"Error: Username and answer are required", 400
 
     # Create new answer
-    new_answer = Answer(username=username, email=email, body=body, ip_address=ip_address, comment_id=comment_id)
+    new_answer = Answer(username=username, email=email, body=body, ip_address=ip_address, user_agent=user_agent, comment_id=comment_id)
 
     try:
         db.session.add(new_answer)
@@ -343,11 +348,14 @@ def download_file(file_name):
 
     # Get the requester's IP address
     ip_address = request.remote_addr
+    # Get the user agent
+    user_agent = request.headers.get('User-Agent', '')
 
     # Log the download in the database
     download_log = DownloadLog(
         file_name=file_name,
-        ip_address=ip_address
+        ip_address=ip_address,
+        user_agent=user_agent
     )
 
     # Save the log to the database
@@ -384,6 +392,8 @@ def analyse():
 
         # Get the requester's IP address
         ip_address = request.remote_addr
+        # Get the user agent
+        user_agent = request.headers.get('User-Agent', '')
 
         # Get the previous messages from the form (if any)
         previous_messages = json.loads(request.form.get('previous_messages', ''))
@@ -395,7 +405,8 @@ def analyse():
         chat_log = AnalyseChat(
             user_message=prompt,
             server_response=server_response,
-            ip_address=ip_address
+            ip_address=ip_address,
+            user_agent=user_agent
         )
 
         try:
