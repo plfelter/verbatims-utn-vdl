@@ -3,13 +3,14 @@ import re
 import os
 from pathlib import Path
 
-from flask import render_template, request, jsonify, redirect, send_from_directory
+from flask import render_template, request, jsonify, redirect, send_from_directory, url_for, flash
 from markupsafe import Markup
 from mistralai import Mistral
 from sqlalchemy import or_
 
 from app import app, db
 from app.models import Contribution, Comment, Answer, SearchLog, AnalyseChat, DownloadLog
+from app.utils import generate_confirmation_token, send_confirmation_email
 
 
 def highlight_keywords(text, keywords):
@@ -190,35 +191,62 @@ def discussion():
         ip_address = request.remote_addr
         user_agent = request.headers.get('User-Agent', '')
 
-        if not username or not body:
-            comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(),
-                                              Comment.created_at.desc()).all()
+        if not username or not body or not email:
+            comments = Comment.query.filter_by(confirmed=True).order_by(
+                (Comment.upvotes - Comment.downvotes).desc(),
+                Comment.created_at.desc()
+            ).all()
             is_htmx = request.headers.get('HX-Request') == 'true'
             return render_template('discussion.html', comments=comments,
-                                   error="Username and comment are required", is_htmx=is_htmx)
+                                   error="Username, email, and comment are required", is_htmx=is_htmx)
 
-        new_comment = Comment(username=username, email=email, body=body, ip_address=ip_address, user_agent=user_agent)
+        # Generate a confirmation token
+        confirmation_token = generate_confirmation_token()
+
+        # Create a new comment with confirmed=False
+        new_comment = Comment(
+            username=username, 
+            email=email, 
+            body=body, 
+            ip_address=ip_address, 
+            user_agent=user_agent,
+            confirmed=False,
+            confirmation_token=confirmation_token
+        )
 
         try:
+            # Add the comment to the database
             db.session.add(new_comment)
             db.session.commit()
 
+            # Send confirmation email
+            send_confirmation_email(email, confirmation_token, 'comment', new_comment.id)
+
             # After successful comment creation, return the updated page
-            comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(),
-                                              Comment.created_at.desc()).all()
+            comments = Comment.query.filter_by(confirmed=True).order_by(
+                (Comment.upvotes - Comment.downvotes).desc(),
+                Comment.created_at.desc()
+            ).all()
             is_htmx = request.headers.get('HX-Request') == 'true'
-            return render_template('discussion.html', comments=comments, is_htmx=is_htmx)
+            return render_template('discussion.html', comments=comments, 
+                                   success="Your comment has been submitted. Please check your email to confirm it.", 
+                                   is_htmx=is_htmx)
         except Exception as e:
             db.session.rollback()
-            comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(),
-                                              Comment.created_at.desc()).all()
+            comments = Comment.query.filter_by(confirmed=True).order_by(
+                (Comment.upvotes - Comment.downvotes).desc(),
+                Comment.created_at.desc()
+            ).all()
             is_htmx = request.headers.get('HX-Request') == 'true'
             return render_template('discussion.html', comments=comments,
                                    error=str(e), is_htmx=is_htmx)
 
-    # Get all comments ordered by vote score (highest first), then by creation date (newest first)
+    # Get all confirmed comments ordered by vote score (highest first), then by creation date (newest first)
     # We use a hybrid approach with a subquery to order by the calculated vote_score
-    comments = Comment.query.order_by((Comment.upvotes - Comment.downvotes).desc(), Comment.created_at.desc()).all()
+    comments = Comment.query.filter_by(confirmed=True).order_by(
+        (Comment.upvotes - Comment.downvotes).desc(), 
+        Comment.created_at.desc()
+    ).all()
 
     # Check if the request wants HTML or JSON
     if request.args.get('format') != 'json':
@@ -280,21 +308,37 @@ def add_answer(comment_id):
     ip_address = request.remote_addr
     user_agent = request.headers.get('User-Agent', '')
 
-    if not username or not body:
-        return f"Error: Username and answer are required", 400
+    if not username or not body or not email:
+        return f"Error: Username, email, and answer are required", 400
 
-    # Create new answer
-    new_answer = Answer(username=username, email=email, body=body, ip_address=ip_address, user_agent=user_agent, comment_id=comment_id)
+    # Generate a confirmation token
+    confirmation_token = generate_confirmation_token()
+
+    # Create new answer with confirmed=False
+    new_answer = Answer(
+        username=username, 
+        email=email, 
+        body=body, 
+        ip_address=ip_address, 
+        user_agent=user_agent, 
+        comment_id=comment_id,
+        confirmed=False,
+        confirmation_token=confirmation_token
+    )
 
     try:
         db.session.add(new_answer)
         db.session.commit()
+
+        # Send confirmation email
+        send_confirmation_email(email, confirmation_token, 'answer', new_answer.id)
     except Exception as e:
         db.session.rollback()
         return f"Error: {str(e)}", 500
 
-    # Return the updated comment HTML
-    return render_template('comment_partial.html', comment=comment)
+    # Return the updated comment HTML with success message
+    return render_template('comment_partial.html', comment=comment, 
+                          answer_success="Your answer has been submitted. Please check your email to confirm it.")
 
 
 def get_mistral_answer(chat_messages: list[dict], prompt: str):
@@ -431,3 +475,37 @@ def a_propos():
     A propos page with information about the author and the project.
     """
     return render_template('a_propos.html')
+
+
+@app.route('/confirm/<content_type>/<int:content_id>/<token>')
+def confirm_content(content_type, content_id, token):
+    """
+    Confirm a comment or answer by validating the token.
+
+    Args:
+        content_type (str): Either 'comment' or 'answer'
+        content_id (int): The ID of the comment or answer
+        token (str): The confirmation token
+    """
+    if content_type not in ['comment', 'answer']:
+        return "Invalid content type", 400
+
+    # Get the content based on type
+    if content_type == 'comment':
+        content = Comment.query.get_or_404(content_id)
+    else:  # content_type == 'answer'
+        content = Answer.query.get_or_404(content_id)
+
+    # Validate the token
+    if content.confirmation_token != token:
+        return "Invalid or expired confirmation token", 400
+
+    # Mark the content as confirmed
+    content.confirmed = True
+
+    try:
+        db.session.commit()
+        return render_template('confirmation_success.html', content_type=content_type)
+    except Exception as e:
+        db.session.rollback()
+        return f"Error confirming {content_type}: {str(e)}", 500

@@ -33,10 +33,10 @@
     <!-- Answers Section -->
     <div class="answers-section">
         <!-- Display existing answers -->
-        {% if comment.answers.count() > 0 %}
+        {% if comment.answers.filter_by(confirmed=True).count() > 0 %}
             <h4>Answers:</h4>
             <div class="answers-list">
-                {% for answer in comment.answers %}
+                {% for answer in comment.answers.filter_by(confirmed=True) %}
                     <div class="answer">
                         <div class="answer-header">
                             <strong>{{ answer.username }}</strong>
@@ -51,6 +51,12 @@
         {% endif %}
 
         <!-- Answer Form -->
+        {% if answer_success %}
+        <div class="success-message">
+            {{ answer_success }}
+        </div>
+        {% endif %}
+
         <div class="answer-form-toggle">
             <button 
                 class="toggle-answer-form-button"

@@ -7,6 +7,9 @@
         {% if error %}
         <div class="error">{{ error }}</div>
         {% endif %}
+        {% if success %}
+        <div class="success-message">{{ success }}</div>
+        {% endif %}
         <form hx-post="/discussion" hx-target="#discussion-container" hx-swap="outerHTML">
             <div>
                 <label for="username">Your Name:</label><br>
