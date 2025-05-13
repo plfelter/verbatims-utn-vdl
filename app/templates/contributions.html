@@ -3,38 +3,41 @@
 {% block title %}Contributions{% endblock %}
 
 {% block content %}
-<div id="contributions-container">
-    <h1>Contributions</h1>
+    <div id="contributions-container">
+        <h1>Contributions</h1>
+        <p>Ces contributions ont été déposées dans le cadre de la participation du public par voie électronique (PPVE)
+            relative à la demande de création d'une UTNS (Unité Touristique Nouvelle Structurante) sur le secteur de
+            Côte 2000 à Villard-de-Lans, clôturée le mercredi 30 avril 2025.</p>
 
-    <!-- Search Bar -->
-    <div id="search-container">
-        <h3>
-            Search Contributions
-        </h3>
-        <input class="form-control" type="search"
-               name="search" placeholder="Type keywords to search contributions..."
-               hx-post="{{ url_for('get_contributions') }}"
-               hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
-               hx-target=".contributions-grid"
-               hx-swap="innerHTML"
-               hx-indicator=".htmx-indicator">
-        <div class="htmx-indicator">
-            <img src="{{ url_for('static', filename='img/loading.svg') }}" alt="Loading..."/> Searching...
+        <!-- Search Bar -->
+        <div id="search-container">
+            <h3>
+                Rechercher dans les contributions
+            </h3>
+            <input class="form-control" type="search"
+                   name="search" placeholder="Recherche par mots clefs..."
+                   hx-post="{{ url_for('get_contributions') }}"
+                   hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+                   hx-target=".contributions-grid"
+                   hx-swap="innerHTML"
+                   hx-indicator=".htmx-indicator">
+            <div class="htmx-indicator">
+                <img src="{{ url_for('static', filename='img/loading.svg') }}" alt="Loading..."/> Searching...
+            </div>
+            <div id="search-count" class="search-count">
+                {% if total_count is defined %}
+                    {{ total_count }} contribution{% if total_count != 1 %}s{% endif %} found
+                {% endif %}
+            </div>
         </div>
-        <div id="search-count" class="search-count">
-            {% if total_count is defined %}
-            {{ total_count }} contribution{% if total_count != 1 %}s{% endif %} found
-            {% endif %}
+
+        <div class="contributions-grid"
+             hx-get="{{ url_for('get_contributions') }}"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            <!-- Content will be loaded via HTMX -->
+            <div class="loading-cell">Loading contributions...</div>
         </div>
-    </div>
 
-    <div class="contributions-grid"
-         hx-get="{{ url_for('get_contributions') }}"
-         hx-trigger="load"
-         hx-swap="innerHTML">
-        <!-- Content will be loaded via HTMX -->
-        <div class="loading-cell">Loading contributions...</div>
     </div>
-
-</div>
 {% endblock %}

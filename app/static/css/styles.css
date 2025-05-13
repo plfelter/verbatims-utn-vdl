@@ -12,6 +12,7 @@
     --success-color: #27ae60;
     --user-message-bg: #dcf8c6;
     --server-message-bg: #f1f0f0;
+    --admin-note-color: #e6d839;
 
     /* Navigation and sidebar colors */
     --nav-bg-color: #15385B;
@@ -726,6 +727,16 @@ button:focus:not(:active)::after {
     color: var(--success-color);
     background-color: rgba(39, 174, 96, 0.1);
     border-left: 4px solid var(--success-color);
+    border-radius: var(--border-radius);
+    animation: fadeIn 0.5s ease-out, slideIn 0.5s ease-out;
+}
+
+.admin-message{
+    margin-bottom: 10px;
+    padding: 10px;
+    /*color: var(--admin-note-color);*/
+    background-color: rgba(230, 216, 57, 0.1);
+    border-left: 4px solid var(--admin-note-color);
     border-radius: var(--border-radius);
     animation: fadeIn 0.5s ease-out, slideIn 0.5s ease-out;
 }

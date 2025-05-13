@@ -3,80 +3,89 @@
 {% block title %}Download Anonymized Contributions{% endblock %}
 
 {% block content %}
-<div class="download-container">
-    <h1>Download Anonymized Contributions</h1>
-    <p>Download the anonymized contributions data in your preferred format:</p>
+    <div class="download-container">
+        <h1>Téléchargements</h1>
+        <h3>Fichiers de données des contributions:</h3>
+        <div class="download-buttons">
+            <a href="{{ url_for('download_file', file_name='contributions-anonymisees.csv') }}"
+               class="download-button csv-button">
+                <img src="{{ url_for('static', filename='img/csv-logo.svg') }}" alt="CSV" class="format-logo">
+                <span>Format .CSV</span>
+            </a>
 
-    <div class="download-buttons">
-        <a href="{{ url_for('download_file', file_name='contributions-anonymisees.csv') }}" class="download-button csv-button">
-            <img src="{{ url_for('static', filename='img/csv-logo.svg') }}" alt="CSV" class="format-logo">
-            <span>Download CSV</span>
-        </a>
-
-        <a href="{{ url_for('download_file', file_name='contributions-anonymisees.json') }}" class="download-button json-button">
-            <img src="{{ url_for('static', filename='img/json-logo.svg') }}" alt="JSON" class="format-logo">
-            <span>Download JSON</span>
-        </a>
-
-        <a href="{{ url_for('download_file', file_name='dossier-utns-vdl-20241010.pdf') }}" class="download-button utns-button">
-            <img src="{{ url_for('static', filename='img/utns-logo.png') }}" alt="Dossier UTNS" class="format-logo">
-            <span>Dossier UTNS</span>
-        </a>
+            <a href="{{ url_for('download_file', file_name='contributions-anonymisees.json') }}"
+               class="download-button json-button">
+                <img src="{{ url_for('static', filename='img/json-logo.svg') }}" alt="JSON" class="format-logo">
+                <span>Format .JSON</span>
+            </a>
+        </div>
+        <br>
+        <h3>Fichiers relatifs au dossier d'Unité Touristique Nouvelle Structurante de Villard-de-Lans:</h3>
+        <div class="download-buttons">
+            <a href="{{ url_for('download_file', file_name='dossier-utns-vdl-20241010.pdf') }}"
+               class="download-button utns-button">
+                <img src="{{ url_for('static', filename='img/utns-logo.png') }}" alt="Dossier UTNS" class="utns-logo">
+                <span>Dossier UTNS</span>
+            </a>
+        </div>
     </div>
-</div>
 
-<style>
-    .download-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        text-align: center;
-    }
+    <style>
+        .download-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
 
-    .download-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 30px;
-        margin-top: 40px;
-    }
+        .download-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
 
-    .download-button {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-        width: 200px;
-        text-decoration: none;
-        color: white;
-        background-color: var(--primary-color);
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow-md);
-        transition: var(--transition-normal);
-    }
+        .download-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            width: 200px;
+            text-decoration: none;
+            color: white;
+            background-color: var(--primary-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-normal);
+        }
 
-    .download-button:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-lg);
-        animation: buttonPulse 1.5s infinite;
-    }
+        .download-button:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            animation: buttonPulse 1.5s infinite;
+        }
 
-    .csv-button {
-        background-color: #4CAF50;
-    }
+        .csv-button {
+            background-color: #4CAF50;
+        }
 
-    .json-button {
-        background-color: #3498db;
-    }
+        .json-button {
+            background-color: #3498db;
+        }
 
-    .format-logo {
-        width: 80px;
-        height: 80px;
-        margin-bottom: 15px;
-    }
+        .format-logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+        }
 
-    .download-button span {
-        font-weight: bold;
-        font-size: 1.2rem;
-    }
-</style>
+        .utns-logo {
+            margin-bottom: 15px;
+        }
+
+        .download-button span {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+    </style>
 {% endblock %}

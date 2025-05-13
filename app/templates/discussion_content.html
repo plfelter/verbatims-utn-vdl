@@ -1,33 +1,35 @@
 <div id="discussion-container">
     <h1>Discussion</h1>
+    <div class="admin-message"><b>Note de l'administrateur</b><br>Vous pouvez utiliser cet espace de discussion librement, en veillant à rester courtois
+        et dans le respect des autres utilisateurs.</div>
 
     <!-- Comment Form with HTMX -->
     <div id="comment-form">
-        <h2>Post a Comment</h2>
+        <h3>Ecrire un commentaire</h3>
         {% if error %}
-        <div class="error">{{ error }}</div>
+            <div class="error">{{ error }}</div>
         {% endif %}
         {% if success %}
-        <div class="success">{{ success }}</div>
+            <div class="success">{{ success }}</div>
         {% endif %}
         <form hx-post="/discussion" hx-target="#discussion-container" hx-swap="outerHTML">
             <div>
-                <label for="username">Your Name:</label><br>
+                <label for="username">Votre nom ou pseudonyme:</label><br>
                 <input type="text" id="username" name="username" required>
             </div>
             <div>
-                <label for="captcha">Enter the text shown below:</label><br>
+                <label for="body">Commentaire:</label><br>
+                <textarea id="body" name="body" rows="4" required></textarea>
+            </div>
+            <div>
+                <label for="captcha">Validez votre commentaire en recopiant le texte de l'image ci-dessous:</label><br>
                 <input type="text" id="captcha" name="captcha" required>
                 <div class="captcha-container">
                     <img src="data:image/png;base64,{{ captcha_image }}" alt="CAPTCHA">
                     <input type="hidden" name="captcha_text" value="{{ captcha_text }}">
                 </div>
             </div>
-            <div>
-                <label for="body">Comment:</label><br>
-                <textarea id="body" name="body" rows="4" required></textarea>
-            </div>
-            <button type="submit">Post Comment</button>
+            <button type="submit">Poster le commentaire</button>
         </form>
     </div>
 
@@ -39,7 +41,7 @@
                 {% include 'comment_partial.html' %}
             {% endfor %}
         {% else %}
-            <p>No comments yet. Be the first to comment!</p>
+            <p>Aucun commentaire. Démarrez la discussion !</p>
         {% endif %}
     </div>
 </div>
