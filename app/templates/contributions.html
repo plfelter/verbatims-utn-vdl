@@ -15,7 +15,7 @@
                 Rechercher dans les contributions
             </h3>
             <input class="form-control" type="search"
-                   name="search" placeholder="Recherche par mots clefs..."
+                   name="search" placeholder="Mots clefs, numero, date..."
                    hx-post="{{ url_for('get_contributions') }}"
                    hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
                    hx-target=".contributions-grid"
