@@ -1,6 +1,7 @@
 import json
 import re
 import os
+from pathlib import Path
 
 from flask import render_template, request, jsonify, redirect, send_from_directory
 from markupsafe import Markup
@@ -322,26 +323,30 @@ def download():
     return render_template('download.html')
 
 
-@app.route('/download-file/<file_type>')
-def download_file(file_type):
+@app.route('/download-file/<file_name>')
+def download_file(file_name):
     """
-    Route to download the anonymized contributions file in the specified format.
+    Route to download any file from the resources directory.
 
     Args:
-        file_type (str): The file type to download ('csv' or 'json')
+        file_name (str): The name of the file within the resources directory
 
     Returns:
         Response: The file download response
     """
-    if file_type not in ['csv', 'json']:
-        return "Invalid file type", 400
+    # List files in resources directory
+    resources_path = Path(__file__).resolve().parent.parent / "resources"
+    available_files = {fp.name: fp for fp in resources_path.rglob('*')}
+
+    if file_name not in available_files:
+        return "Invalid file name", 400
 
     # Get the requester's IP address
     ip_address = request.remote_addr
 
     # Log the download in the database
     download_log = DownloadLog(
-        file_type=file_type,
+        file_name=file_name,
         ip_address=ip_address
     )
 
@@ -354,16 +359,9 @@ def download_file(file_type):
         print(f"Error logging download: {str(e)}")
         db.session.rollback()
 
-    # Get the project root directory
-    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    verbatims_dir = os.path.join(root_dir, 'resources', 'verbatims')
-
-    # Define the file name based on the requested type
-    file_name = f"contributions-anonymisees.{file_type}"
-
     # Send the file to the client
     return send_from_directory(
-        verbatims_dir,
+        available_files[file_name].parent.resolve(),
         file_name,
         as_attachment=True,
         download_name=file_name

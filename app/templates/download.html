@@ -8,12 +8,12 @@
     <p>Download the anonymized contributions data in your preferred format:</p>
 
     <div class="download-buttons">
-        <a href="{{ url_for('download_file', file_type='csv') }}" class="download-button csv-button">
+        <a href="{{ url_for('download_file', file_name='contributions-anonymisees.csv') }}" class="download-button csv-button">
             <img src="{{ url_for('static', filename='img/csv-logo.svg') }}" alt="CSV" class="format-logo">
             <span>Download CSV</span>
         </a>
 
-        <a href="{{ url_for('download_file', file_type='json') }}" class="download-button json-button">
+        <a href="{{ url_for('download_file', file_name='contributions-anonymisees.json') }}" class="download-button json-button">
             <img src="{{ url_for('static', filename='img/json-logo.svg') }}" alt="JSON" class="format-logo">
             <span>Download JSON</span>
         </a>
